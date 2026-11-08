@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useProgramme } from "@/lib/programmeData";
-import { FLOORS, formatSgt, monthOf } from "@/lib/programme";
-import { monthOf as mk } from "@/lib/metrics";
+import { FLOORS, formatSgt } from "@/lib/programme";
+import { monthOf } from "@/lib/metrics";
 import AdminTable from "@/components/admin/AdminTable";
 import StatusChip from "@/components/cb/StatusChip";
 import PrivatePhoto from "@/components/cb/PrivatePhoto";

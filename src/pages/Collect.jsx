@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useProgramme } from "@/lib/programmeData";
-import { floorRows } from "@/lib/metrics";
 import { groundDropState } from "@/lib/groundDrop";
 import { monthOf } from "@/lib/metrics";
 import TowerView from "@/components/cb/TowerView";

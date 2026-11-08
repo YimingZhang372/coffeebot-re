@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useProgramme } from "@/lib/programmeData";
-import { FLOOR_CODES, floorByCode, monthLabel, formatSgt } from "@/lib/programme";
+import { floorByCode, monthLabel, formatSgt } from "@/lib/programme";
 import { downloadCertificate } from "@/lib/certPdf";
 import { downloadCsv } from "@/lib/csv";
 import AdminTable from "@/components/admin/AdminTable";
