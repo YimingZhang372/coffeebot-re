@@ -63,7 +63,7 @@ export default function AdminShell() {
         >
           <div className="flex h-full flex-col">
             <div className="border-b border-rule px-5 py-4">
-              <img src={IMG.logo} alt="CoffeeBot" className="h-6 w-auto" />
+              <img src={IMG.logo} alt="CoffeeBot" className="h-10 w-auto shrink-0" />
               <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-sub">Sustainability Console</p>
             </div>
 

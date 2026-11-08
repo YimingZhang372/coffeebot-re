@@ -44,7 +44,7 @@ function Preloader({ onDone }) {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
       <div className="flex items-center justify-between">
-        <img src={IMG.logo} alt="CoffeeBot" className="h-6 w-auto brightness-0 invert" />
+        <img src={IMG.logo} alt="CoffeeBot" className="h-8 w-auto" />
         <span className="text-[11px] uppercase tracking-[0.2em] text-white/50">coffeebot re v2.3</span>
       </div>
       <div className="display tabular text-[20vw] leading-none text-white sm:text-[160px]">
@@ -100,7 +100,7 @@ export default function Login() {
       >
         <header className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-10">
           <div className="flex items-center gap-4">
-            <img src={IMG.logo} alt="CoffeeBot" className="h-12 w-auto" />
+            <img src={IMG.logo} alt="CoffeeBot" className="h-16 w-auto shrink-0" />
             <span className="hidden h-9 w-px bg-rule sm:block" />
             <div className="hidden items-center gap-2.5 sm:flex">
               <span className="flex h-8 items-center border border-rule px-2 text-[10px] font-semibold tracking-[0.16em] text-ink">
@@ -253,7 +253,7 @@ export default function Login() {
 
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-rule px-5 py-6 text-[12px] text-sub sm:px-10">
           <div className="flex items-center gap-3">
-            <img src={IMG.logo} alt="CoffeeBot" className="h-5 w-auto opacity-70" />
+            <img src={IMG.logo} alt="CoffeeBot" className="h-7 w-auto opacity-80" />
             <span>CoffeeBot Re v2.3</span>
           </div>
           <div className="flex flex-wrap items-center gap-5">

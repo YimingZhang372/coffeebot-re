@@ -60,7 +60,7 @@ export default function AppShell() {
           </button>
 
           <Link to="/" className="ml-2 hidden items-center gap-3 sm:flex">
-            <img src={IMG.logo} alt="CoffeeBot" className="h-6 w-auto" />
+            <img src={IMG.logo} alt="CoffeeBot" className="h-11 w-auto shrink-0" />
             <span className="h-5 w-px bg-rule" />
             <span className="text-[11px] uppercase tracking-[0.14em] text-sub">Deployed at Harbourline Bank</span>
           </Link>
@@ -93,7 +93,7 @@ export default function AppShell() {
       <footer className="border-t border-rule px-5 py-6 sm:px-8">
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 text-[12px] text-sub">
           <div className="flex items-center gap-3">
-            <img src={IMG.logo} alt="CoffeeBot" className="h-5 w-auto opacity-70" />
+            <img src={IMG.logo} alt="CoffeeBot" className="h-7 w-auto opacity-80" />
             <span>CoffeeBot Re v2.3</span>
             <span className="hidden h-4 w-px bg-rule sm:block" />
             <span className="hidden items-center gap-2 sm:flex">

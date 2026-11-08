@@ -37,7 +37,7 @@ export default function MenuOverlay({ open, onClose }) {
         >
           <div className="mx-auto flex min-h-full max-w-[1280px] flex-col px-5 py-6 sm:px-8">
             <div className="flex items-center justify-between">
-              <img src={IMG.logo} alt="CoffeeBot" className="h-7 w-auto brightness-0 invert" />
+              <img src={IMG.logo} alt="CoffeeBot" className="h-10 w-auto" />
               <button
                 type="button"
                 onClick={onClose}
