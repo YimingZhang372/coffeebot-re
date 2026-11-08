@@ -1,17 +1,24 @@
 import { useMemo, useState } from "react";
 import { useProgramme } from "@/lib/programmeData";
-import { floorByCode, monthLabel, formatSgt } from "@/lib/programme";
+import { floorByCode, monthLabel, formatSgt, monthKey } from "@/lib/programme";
 import { downloadCertificate } from "@/lib/certPdf";
 import { downloadCsv } from "@/lib/csv";
 import AdminTable from "@/components/admin/AdminTable";
+import CertificateSheet from "@/components/admin/CertificateSheet";
 import StatusChip from "@/components/cb/StatusChip";
-import Barcode from "@/components/cb/Barcode";
 import Pill from "@/components/cb/Pill";
 
 const PERIODS = [
+  { key: "2026-09", label: "September 2026" },
   { key: "2026-10", label: "October 2026" },
   { key: "2026-11", label: "November 2026" },
 ];
+
+const nextPeriodLabel = (period) => {
+  const [y, m] = period.split("-").map(Number);
+  const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+  return monthLabel(next);
+};
 
 export default function AdminCertificates() {
   const { certificates, rowsFor, me, setCertificateStatus, createCertificate } = useProgramme();
@@ -37,9 +44,9 @@ export default function AdminCertificates() {
         kgReused: Number((r.reused / 1000).toFixed(2)),
         reuseRate: Number(r.reuseRate.toFixed(1)),
         rank: r.rank,
-        nextTarget: `${((r.reused / 1000) * 1.15).toFixed(2)} kg reused · Set by Group Sustainability for the following month`,
+        nextTarget: `${((r.reused / 1000) * 1.15).toFixed(2)} kg reused · Set by Group Sustainability for ${nextPeriodLabel(period)}`,
         status: "draft",
-        volunteeringHours: 0,
+        volunteeringHours: Number((r.posts * 0.5).toFixed(1)),
         activitiesDone: r.posts,
       });
     }
@@ -72,8 +79,8 @@ export default function AdminCertificates() {
       kgCollected: Number((collected / 1000).toFixed(2)),
       kgReused: Number((reused / 1000).toFixed(2)),
       reuseRate: collected ? Number(((reused / collected) * 100).toFixed(1)) : 0,
-      rank: 0,
-      nextTarget: `${((reused / 1000) * 1.15).toFixed(2)} kg reused · Set by Group Sustainability`,
+      rank: 1,
+      nextTarget: `${((reused / 1000) * 1.15).toFixed(2)} kg reused · Set by Group Sustainability for ${nextPeriodLabel(period)}`,
       status: "draft",
     });
     setNotice("Office ESG summary certificate generated as a draft.");
@@ -110,6 +117,8 @@ export default function AdminCertificates() {
   };
 
   const summaryCert = list.find((c) => c.type === "office");
+  void me;
+  void monthKey;
 
   return (
     <div className="space-y-5">
@@ -199,76 +208,13 @@ export default function AdminCertificates() {
 
       {preview && (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-ink/45 px-4 py-8" onClick={() => setPreview(null)}>
-          <div className="mx-auto max-w-[860px]" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-paper p-6">
-              <div className="flex items-start justify-between border-b border-rule pb-3">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-sub">
-                    {preview.type === "office" ? "office esg summary certificate" : "floor certificate"}
-                  </p>
-                  <p className="mt-1 text-[18px] font-semibold">
-                    {preview.type === "office" ? "Marina Bay · all floors" : `${preview.floorCode} · ${floorByCode(preview.floorCode).name}`}
-                  </p>
-                  <p className="text-[12px] text-sub">
-                    {preview.office} · {preview.periodLabel} · GRI 306-4 Waste diverted from disposal — preparation for reuse
-                  </p>
-                </div>
-                <Barcode value={preview.certId} height={30} />
-              </div>
-
-              <table className="mt-5 w-full table-fixed border-collapse text-[12px]">
-                <colgroup>
-                  <col style={{ width: "30%" }} />
-                  <col style={{ width: "25%" }} />
-                  <col style={{ width: "45%" }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th className="border-b border-rule py-2 text-left text-[10px] uppercase tracking-[0.12em] text-sub">Measure</th>
-                    <th className="border-b border-rule py-2 text-left text-[10px] uppercase tracking-[0.12em] text-sub">Value</th>
-                    <th className="border-b border-rule py-2 text-left text-[10px] uppercase tracking-[0.12em] text-sub">Evidence / basis</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ["Kg wet grounds collected", `${Number(preview.kgCollected).toFixed(2)} kg`, "Weighed at the collection table"],
-                    ["Kg grounds reused", `${Number(preview.kgReused).toFixed(2)} kg`, "Reported by employees · validated by the Floor Champion"],
-                    ["Reuse rate", `${Number(preview.reuseRate).toFixed(1)}%`, "Reused ÷ collected"],
-                    ["Rank", preview.rank ? `${preview.rank} of 6` : "—", "kg reused per employee, all Marina Bay floors"],
-                    ["Next target", (preview.nextTarget || "").split(" · ")[0], "Set by Group Sustainability"],
-                    ["Avoided emissions", "Methodology pending", "Not reported for this period"],
-                  ].map((row) => (
-                    <tr key={row[0]} className="align-top">
-                      <td className="border-b border-rule py-2 pr-2">{row[0]}</td>
-                      <td className="border-b border-rule py-2 pr-2 font-semibold">{row[1]}</td>
-                      <td className="border-b border-rule py-2 text-sub">{row[2]}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="mt-6 flex flex-wrap items-end justify-between gap-4 text-[12px]">
-                <div>
-                  <div className="h-px w-48 bg-ink" />
-                  <p className="mt-1">CoffeeBot Operations</p>
-                </div>
-                <div>
-                  <div className="h-px w-56 bg-ink" />
-                  <p className="mt-1">Head of Sustainability, Harbourline Bank</p>
-                </div>
-                <div className="text-right text-[11px] text-sub">
-                  <p className="text-ink">{preview.certId}</p>
-                  <p>/verify/{preview.certId}</p>
-                  <p>{preview.issuedAt ? formatSgt(preview.issuedAt) : "not yet issued"}</p>
-                </div>
-              </div>
-
-              <div className="mt-4 flex justify-end gap-2">
-                <Pill size="sm" variant="ghost" onClick={() => setPreview(null)}>close</Pill>
-                <Pill size="sm" onClick={() => downloadCertificate(preview, { floorName: floorByCode(preview.floorCode).name })}>
-                  download pdf
-                </Pill>
-              </div>
+          <div className="mx-auto max-w-[880px]" onClick={(e) => e.stopPropagation()}>
+            <CertificateSheet cert={preview} />
+            <div className="mt-3 flex justify-end gap-2">
+              <Pill size="sm" variant="ghost" onClick={() => setPreview(null)}>close</Pill>
+              <Pill size="sm" onClick={() => downloadCertificate(preview, { floorName: floorByCode(preview.floorCode).name })}>
+                download pdf
+              </Pill>
             </div>
           </div>
         </div>

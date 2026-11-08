@@ -68,12 +68,14 @@ export function publicNudges({ rows, myRow, monthLabel, daysLeft }) {
   const below = rows[idx + 1];
   const out = [];
   if (above) {
-    const gap = (above.perEmployee - myRow.perEmployee) * myRow.eligible;
-    out.push(
-      `${above.code} is ${Math.max(10, Math.round(gap))} g ahead of ${myRow.code} per employee. Two more reuses would close the gap.`
-    );
+    const gap = Math.max(1, Math.round(above.perEmployee - myRow.perEmployee));
+    out.push(`${above.code} is ${gap} g per employee ahead of ${myRow.code}. One more reuse would close most of that.`);
   } else {
-    out.push(`${myRow.code} leads the office. ${below ? `${below.code} needs ${Math.round(below.perEmployee * below.eligible - myRow.perEmployee * myRow.eligible)} g to catch up.` : ""}`);
+    out.push(
+      below
+        ? `${myRow.code} leads the office by ${Math.max(1, Math.round(myRow.perEmployee - below.perEmployee))} g per employee over ${below.code}.`
+        : `${myRow.code} leads the office on g reused per employee.`
+    );
   }
   const needed = Math.ceil((myRow.target / 100) * myRow.eligible) - myRow.participants;
   if (needed > 0) {
@@ -92,7 +94,7 @@ export function marqueeItems({ rows, myRow, nextDropLabel, challenge }) {
   if (myRow) {
     const idx = rows.findIndex((r) => r.code === myRow.code);
     const above = rows[idx - 1];
-    if (above) items.push(`${above.code} is ${Math.round((above.perEmployee - myRow.perEmployee) * myRow.eligible)} g ahead of ${myRow.code}`);
+    if (above) items.push(`${above.code} is ${Math.max(1, Math.round(above.perEmployee - myRow.perEmployee))} g per employee ahead of ${myRow.code}`);
     const needed = Math.ceil((myRow.target / 100) * myRow.eligible) - myRow.participants;
     if (needed > 0) items.push(`${needed} more ${needed === 1 ? "colleague" : "colleagues"} for ${myRow.code} to hit ${myRow.target}%`);
   }

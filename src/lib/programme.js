@@ -1,9 +1,9 @@
 export const FLOORS = [
-  { code: "L8", name: "Risk & Compliance", dept: "Risk & Compliance", eligible: 26 },
+  { code: "L8", name: "Risk & Compliance", dept: "Risk & Compliance", eligible: 30 },
   { code: "L9", name: "Treasury", dept: "Treasury", eligible: 22 },
-  { code: "L10", name: "Retail Operations", dept: "Retail Operations", eligible: 31 },
-  { code: "L11", name: "Technology", dept: "Technology", eligible: 29 },
-  { code: "L12", name: "Finance & Legal", dept: "Finance & Legal", eligible: 24 },
+  { code: "L10", name: "Retail Operations", dept: "Retail Operations", eligible: 32 },
+  { code: "L11", name: "Technology", dept: "Technology", eligible: 28 },
+  { code: "L12", name: "Finance & Legal", dept: "Finance & Legal", eligible: 20 },
   { code: "L14", name: "HR & Leadership", dept: "HR & Leadership", eligible: 18 },
 ];
 

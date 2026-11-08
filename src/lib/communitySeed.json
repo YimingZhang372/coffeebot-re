@@ -1,0 +1,493 @@
+{
+  "champions": {
+    "L8": { "name": "Ravi Menon", "line": "Runs a compost bin at home and answers mushroom questions faster than he should." },
+    "L9": { "name": "Farah Idris", "line": "Bought a scale for the pantry so nobody has to guess grams." },
+    "L10": { "name": "Daniel Ong", "line": "Keeps the caddy clean and the L10 table stocked every Tuesday." },
+    "L11": { "name": "Priya Raman", "line": "Started the first mushroom kit on this floor and never stopped." },
+    "L12": { "name": "Anna Lim", "line": "Trades soap bars for finished compost, apparently." },
+    "L14": { "name": "Chloe Tan", "line": "Dries grounds on her balcony and brings them back in jars." }
+  },
+  "curated": [
+    {
+      "floor": "L10",
+      "activityKey": "mushrooms",
+      "kind": "progress",
+      "showName": true,
+      "author": "Wei Ling",
+      "note": "Day 9, first pins on the oyster kit. Tiny white dots along the slit, exactly like the guide said.",
+      "timeline": [
+        { "day": 1, "note": "Mixed one part spawn to four parts grounds, sealed the bag, put it in the cupboard." },
+        { "day": 10, "note": "Fully colonised and the first slit is fruiting. Mist twice a day from here." }
+      ]
+    },
+    {
+      "floor": "L14",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "Mixed into the topsoil of the three pothos on the windowsill. The soil finally holds water instead of running straight through."
+    },
+    {
+      "floor": "L9",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "showName": true,
+      "author": "Farah Idris",
+      "note": "Two days drying on the balcony ledge, then a jam jar with holes punched in the lid. My mum asked for a jar for her chillies."
+    },
+    {
+      "floor": "L11",
+      "activityKey": "compost",
+      "kind": "reuse",
+      "note": "Half a bag of shredded paper, one turn with the fork, and the pile is warm again two days later."
+    },
+    {
+      "floor": "L8",
+      "activityKey": "scrub",
+      "kind": "reuse",
+      "note": "Grind it coarse, not fine. The fine batch turned the soap grey and gritty in a bad way."
+    },
+    {
+      "floor": "L12",
+      "activityKey": "plant",
+      "kind": "tip",
+      "note": "Keep grounds 3 cm clear of the stem. Mine went mouldy in the first week because I piled them right up against it."
+    },
+    {
+      "floor": "L10",
+      "activityKey": "mushrooms",
+      "kind": "question",
+      "showName": true,
+      "author": "Daniel Ong",
+      "note": "Does decaf work for mushrooms? The L8 machine is decaf after 3pm and I have a spare kit.",
+      "replies": [
+        { "floor": "L8", "body": "Used decaf twice, colonised fine, maybe a day slower." },
+        { "floor": "L11", "body": "Same here. Give it 12 days instead of 10 and you cannot tell the difference." }
+      ]
+    },
+    {
+      "floor": "L14",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "note": "Collected 240 g on Tuesday, dried it in the pantry overnight, took it home in a paper bag."
+    },
+    {
+      "floor": "L8",
+      "activityKey": "compost",
+      "kind": "progress",
+      "showName": true,
+      "author": "Jun Wei",
+      "note": "The balcony bin is finally doing the work by itself instead of me.",
+      "timeline": [
+        { "day": 1, "note": "Grounds and browns layered 1:3 into the balcony bin." },
+        { "day": 10, "note": "Pile at 48°C this morning, first turn done. Smells like forest floor, not rubbish." }
+      ]
+    },
+    {
+      "floor": "L11",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "The office fig has been sulking since July. Two weeks of grounds and there are four new leaves."
+    },
+    {
+      "floor": "L9",
+      "activityKey": "deodoriser",
+      "kind": "tip",
+      "note": "Only fully dry grounds in the fridge. I tried it wet once and came back to a science experiment."
+    },
+    {
+      "floor": "L11",
+      "activityKey": "mushrooms",
+      "kind": "reuse",
+      "showName": true,
+      "author": "Priya Raman",
+      "note": "Second flush from the same block, smaller caps but just as many. Harvested 180 g for dinner."
+    },
+    {
+      "floor": "L14",
+      "activityKey": "scrub",
+      "kind": "question",
+      "note": "Has anyone cured a bar for longer than 24 hours? Mine still crumbles at the edges.",
+      "replies": [
+        { "floor": "L12", "body": "A week works better. Wrap it in baking paper first and leave it in a cupboard." },
+        { "floor": "L8", "body": "Mine crumbled until I ground the grounds coarser. Might not be the cure time at all." }
+      ]
+    },
+    {
+      "floor": "L12",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "Sprinkled a thin layer over the herb pots — basil, mint, two chillies. The mint has gone feral."
+    },
+    {
+      "floor": "L9",
+      "activityKey": "compost",
+      "kind": "reuse",
+      "note": "Took the whole caddy's worth before clear-out on Thursday. Nothing from L9 went to waste that week."
+    },
+    {
+      "floor": "L8",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "note": "Took 184 g home in a jar, and no photo of the jar because it mostly looked like mud."
+    },
+    {
+      "floor": "L10",
+      "activityKey": "mushrooms",
+      "kind": "reuse",
+      "note": "The kit lives under my desk in a box. Colleagues keep asking what is in it."
+    },
+    {
+      "floor": "L8",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "showName": true,
+      "author": "Ravi Menon",
+      "note": "One pouch in the fridge, one in the shoe cupboard. The cupboard one is doing more work, honestly."
+    },
+    {
+      "floor": "L14",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "Watered the grounds in properly this time. Last batch I left them dry on top and they just sat there."
+    },
+    {
+      "floor": "L11",
+      "activityKey": "compost",
+      "kind": "question",
+      "showName": true,
+      "author": "Mei Lim",
+      "note": "Is anyone else's pile going cold after the second turn? Mine dropped to 30°C overnight.",
+      "replies": [
+        { "floor": "L14", "body": "Add more browns and cover it. Ours did exactly the same in the rain." },
+        { "floor": "L10", "body": "Too wet. Leave the lid off for a day and turn it again on Thursday." }
+      ]
+    },
+    {
+      "floor": "L12",
+      "activityKey": "scrub",
+      "kind": "progress",
+      "note": "Two moulds poured and cut, and the kitchen smelled like a coffee shop all afternoon.",
+      "timeline": [
+        { "day": 1, "note": "Melted the base, stirred in 5% grounds, poured two moulds." },
+        { "day": 10, "note": "Cured and cut. The bars hold together properly this time." }
+      ]
+    },
+    {
+      "floor": "L9",
+      "activityKey": "mushrooms",
+      "kind": "reuse",
+      "showName": true,
+      "author": "Hafiz Rahman",
+      "note": "Oyster mushrooms on toast, day eleven. My flatmate asked which shop I bought them from."
+    },
+    {
+      "floor": "L8",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "Ferns love it. The ones in the lobby planter have doubled since September."
+    },
+    {
+      "floor": "L10",
+      "activityKey": "deodoriser",
+      "kind": "question",
+      "note": "How often is everyone replacing theirs? The guide says three weeks but mine smells of nothing after ten days.",
+      "replies": [
+        { "floor": "L9", "body": "Three weeks if you stir it. Ten days if you do not." }
+      ]
+    },
+    {
+      "floor": "L11",
+      "activityKey": "compost",
+      "kind": "reuse",
+      "note": "The community garden down the road took 2 kg off my hands and asked for more every Tuesday."
+    },
+    {
+      "floor": "L12",
+      "activityKey": "deodoriser",
+      "kind": "tip",
+      "note": "Bring your own jar. The kraft pouches leak through the bottom by the time you reach the MRT."
+    },
+    {
+      "floor": "L14",
+      "activityKey": "mushrooms",
+      "kind": "reuse",
+      "note": "Third flush is a stretch. Two good ones and the block goes into the compost."
+    },
+    {
+      "floor": "L12",
+      "activityKey": "scrub",
+      "kind": "reuse",
+      "showName": true,
+      "author": "Anna Lim",
+      "note": "Made six bars and left four in the L12 pantry with a note. They were gone by lunch."
+    },
+    {
+      "floor": "L9",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "The tomato plants on the balcony are the beneficiaries this week. Two more trusses than last year."
+    },
+    {
+      "floor": "L14",
+      "activityKey": "compost",
+      "kind": "progress",
+      "showName": true,
+      "author": "Chloe Tan",
+      "note": "Started a 40 L bin on the balcony and it is already halfway to soil.",
+      "timeline": [
+        { "day": 1, "note": "Grounds, dry leaves and cardboard into a 40 L bin." },
+        { "day": 10, "note": "Turned once, no smell, and the worms have moved in. Half the volume already." }
+      ]
+    },
+    {
+      "floor": "L10",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "note": "Dried on the office window ledge behind the printer. Two days, bone dry, no smell in the room."
+    },
+    {
+      "floor": "L10",
+      "activityKey": "mushrooms",
+      "kind": "question",
+      "showName": true,
+      "author": "Wei Ling",
+      "note": "Ours fruited sideways out of the slit. Do I turn the block around or leave it?",
+      "replies": [
+        { "floor": "L12", "body": "Leave it. They grow toward the light either way and turning it breaks the pins." },
+        { "floor": "L8", "body": "Leave it and rotate the box a quarter turn next flush, not this one." }
+      ]
+    },
+    {
+      "floor": "L11",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "Roses, of all things. The grounds went straight into the bed at my parents' place."
+    },
+    {
+      "floor": "L8",
+      "activityKey": "compost",
+      "kind": "reuse",
+      "note": "Third week running. The bin is at 52°C and the neighbours have stopped asking about the smell."
+    },
+    {
+      "floor": "L9",
+      "activityKey": "scrub",
+      "kind": "reuse",
+      "note": "Gave one bar to the barista downstairs. He asked for the recipe, which I took as a compliment."
+    },
+    {
+      "floor": "L9",
+      "activityKey": "mushrooms",
+      "kind": "progress",
+      "showName": true,
+      "author": "Farah Idris",
+      "note": "First kit from the L9 pantry grounds, and it actually worked.",
+      "timeline": [
+        { "day": 1, "note": "Mixed 1 part spawn to 4 parts grounds and sealed the bag." },
+        { "day": 10, "note": "Fully white, cut the first slit this morning." }
+      ]
+    },
+    {
+      "floor": "L14",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "note": "Weighed in at 267 g on Tuesday. Best week yet on L14."
+    },
+    {
+      "floor": "L12",
+      "activityKey": "plant",
+      "kind": "reuse",
+      "note": "Used the dried grounds on the succulents after all, thin layer, and they are fine three weeks on."
+    },
+    {
+      "floor": "L10",
+      "activityKey": "compost",
+      "kind": "reuse",
+      "note": "The pile finally hit 55°C. Three weeks of grounds and browns and it is doing the work itself now."
+    },
+    {
+      "floor": "L11",
+      "activityKey": "deodoriser",
+      "kind": "reuse",
+      "note": "Two trays dried on the balcony and a full jar in the fridge. The pantry one smells like a cafe now."
+    }
+  ],
+  "tails": {
+    "plant": [
+      "Worked it into the topsoil of the three pothos by the window.",
+      "The office fig has been sulking since July and finally has new leaves.",
+      "Sprinkled a thin layer around the mint and the two chillies.",
+      "The ferns in the lobby planter have doubled since September.",
+      "Kept 3 cm clear of the stem this time, no mould after a week.",
+      "Watered it in properly so it binds with the soil.",
+      "The monstera threw out a leaf the size of my hand.",
+      "Used it on the balcony tomatoes, two more trusses than last year.",
+      "The roses at my parents' place took the whole batch.",
+      "Split it between the desk succulent and the snake plant.",
+      "Loosened the top 2 cm first, which made a difference.",
+      "The basil came back after looking half dead for a month.",
+      "Two teaspoons per pot, once a week, nothing more.",
+      "Left the rest in a paper bag for the next watering.",
+      "Mixed it with a little water, otherwise it just sat on top.",
+      "The peace lily flowered for the first time in two years.",
+      "Potted up a cutting and used grounds in the mix.",
+      "Filled a jar for the neighbour's herb pots as well.",
+      "Applied it before a long weekend so it had time to settle.",
+      "The curry leaf plant on the corridor has stopped dropping.",
+      "Made a thin ring around the stem rather than a pile.",
+      "Two weeks in, the leaves are a much darker green.",
+      "Half went to the office plants, half came home.",
+      "Used it on the orchid bark mix, very sparingly.",
+      "The lemon tree liked it more than anything else I have tried.",
+      "Scaled back to once a fortnight after the first month.",
+      "The pothos cuttings rooted faster in the grounds mix.",
+      "Brought a scoop to the roof garden on Saturday.",
+      "Dug it in lightly rather than leaving it on the surface.",
+      "The geraniums on the balcony have not stopped flowering.",
+      "Stored it dry until Sunday and applied it then.",
+      "A tiny amount goes a long way on indoor pots."
+    ],
+    "compost": [
+      "Layered it 1:3 with shredded paper and turned the pile.",
+      "The bin hit 52°C two days later.",
+      "Added dry leaves I had been storing since August.",
+      "Turned it once and covered it with an old sack.",
+      "The neighbours stopped asking about the smell.",
+      "Half the volume is gone already.",
+      "Worms have moved in, which I am taking as a good sign.",
+      "Took 2 kg to the community garden down the road.",
+      "The pile went cold, so I added browns and covered it.",
+      "Third week running and it is still hot in the middle.",
+      "Cardboard from the office deliveries went in as browns.",
+      "Turned it with a fork, which took twenty minutes.",
+      "No smell at all after the second turn.",
+      "Used the finished compost on the balcony planters.",
+      "Filled a 40 L bin with grounds, leaves and cardboard.",
+      "The ratio matters more than the volume, I have learned.",
+      "Covered it during the rain and it recovered by itself.",
+      "Sieved the finished batch and stored it in a sack.",
+      "Gave a bucket to the gardener at the condo.",
+      "Started a second bin because the first one filled up.",
+      "Grounds heat faster than anything else I have added.",
+      "Turned it every four days for two weeks.",
+      "The temperature dropped overnight so I covered it properly.",
+      "Mixed in coffee chaff from a roastery nearby.",
+      "Spread the finished compost over the herb bed.",
+      "It finally looks like soil rather than bits of things.",
+      "Kept a bucket under the sink between collections.",
+      "Added water when it started to look dry on top.",
+      "The pile has gone from 40 L to about 15 L.",
+      "Shared the surplus with two neighbours.",
+      "Turned it on Saturday morning, best part of the week.",
+      "Two months in and it is nearly ready to use."
+    ],
+    "mushrooms": [
+      "Colonised fully in ten days and the first slit went in after that.",
+      "Misted twice a day and it fruited sideways out of the slit.",
+      "Kept it dark and warm for the first ten days.",
+      "One part spawn to four parts grounds, as the guide says.",
+      "Cut a 4 cm slit and misted morning and evening.",
+      "The caps flattened on day twelve and I harvested.",
+      "Gave half the harvest to the pantry for lunch.",
+      "Used decaf grounds by mistake and it worked anyway.",
+      "Wrapped the bag in a towel to keep the warmth in.",
+      "Harvested 240 g across two flushes.",
+      "The second slit fruited a week after the first.",
+      "Moved the box to the bathroom, which is warmer.",
+      "Dried the surplus on a tray for the rest of the week.",
+      "The block shrank by half after the second flush.",
+      "Started a second kit so the harvests overlap.",
+      "Kept notes on a card taped to the box.",
+      "The stems were longer than expected and the caps smaller.",
+      "Shared the spawn with a colleague on my floor.",
+      "Placed it near a window but out of direct light.",
+      "Cooked them with garlic and a lot of butter.",
+      "The first flush was 150 g, the second 95 g.",
+      "Binned the block after three flushes, as advised.",
+      "Collected the grounds on Tuesday and started it the same night.",
+      "Harvested on a Saturday and ate them the same day.",
+      "Bag sat in the cupboard for nine days before anything showed.",
+      "Second kit was better than the first because I kept it warmer.",
+      "Weighed the flush for once: 210 g from one slit.",
+      "The neighbours got a bag of them and asked for the method.",
+      "Cut the slit smaller this time and the caps came out neater.",
+      "Misted with a spray bottle kept next to the sink.",
+      "Started it on a Friday so the pins came at the weekend.",
+      "Used the whole bag of grounds and there was room to spare."
+    ],
+    "scrub": [
+      "Melted the base and stirred in 5% grounds by weight.",
+      "Poured two moulds and cut them after 24 hours.",
+      "Cured a week longer, which stopped the crumbly edges.",
+      "Dried the grounds for two days first.",
+      "Used a plain melt-and-pour base, nothing fancy.",
+      "Wrapped them in baking paper and string.",
+      "The second batch came out much smoother.",
+      "Too much grounds makes it scratchy, 5% is right.",
+      "Made six bars and kept two for the bathroom.",
+      "It leaves the sink smelling like a cafe.",
+      "Kept the bar dry between uses and it lasted a month.",
+      "Added a few drops of orange oil to the second batch.",
+      "The mould was an old silicone tray and it worked fine.",
+      "Cured them on a rack in the cupboard.",
+      "Gave two to my sister, she wants more for Christmas.",
+      "The grounds were not fully dry and the bar sweated.",
+      "Cut the bars smaller than the first time, easier to hold.",
+      "Used an espresso grind, which made it denser.",
+      "Made a batch with the L12 pantry grounds.",
+      "They harden faster in air conditioning, apparently.",
+      "Sold three at the floor bake sale and donated the rest.",
+      "Ground it in a spice grinder, which took five minutes.",
+      "Second attempt at curing and a much better result.",
+      "The kitchen smelled of coffee for a whole afternoon.",
+      "Kept one bar by the kitchen sink on the floor.",
+      "Mixed in a little honey for the third batch.",
+      "Wrapped them with a stamped label, small thing.",
+      "Two bars left in the pantry if anyone wants one.",
+      "Did the melting in a double boiler, no burnt bits.",
+      "The first batch went to the gym bag and never came back.",
+      "Cut them thin so they fit in the soap dish.",
+      "Cured them next to the dehumidifier and they were ready early."
+    ],
+    "deodoriser": [
+      "Fully dry grounds only, the wet attempt was a mistake.",
+      "Replaced it after three weeks, as the guide says.",
+      "Stirred it once a week to keep it working.",
+      "Zero smell in the fridge two days in.",
+      "Stored it in a breathable pouch rather than a sealed jar.",
+      "Dried them on the office window ledge behind the printer.",
+      "Put one in the car, which was the real test.",
+      "Dried a tray over the weekend and filled two jars.",
+      "Replaced the kitchen bin one as well.",
+      "It absorbs the smell of last night's fish, genuinely.",
+      "Left the jar in the fridge door shelf.",
+      "Made a pouch from an old cotton sock, do not ask.",
+      "One in the gym bag has been life changing.",
+      "Kept the lid loose so it can actually absorb.",
+      "The shoe cupboard finally smells of nothing.",
+      "Two trays of grounds took a day and a half to dry.",
+      "Used a paper bag with a few holes, worked fine.",
+      "Topped it up rather than replacing the whole jar.",
+      "The office fridge has never been better.",
+      "Dried them on a radiator in the end, which was faster.",
+      "Replaced it on the first of the month as a habit.",
+      "Made three jars and gave one to my flatmate.",
+      "The one under the sink is doing the most work.",
+      "Gave a jar to the L14 pantry.",
+      "No mould this time because the grounds were bone dry.",
+      "Refreshed it after a month and it still had some colour.",
+      "A jar in the fridge and one in the wardrobe.",
+      "Cheaper than anything I have bought for the same job.",
+      "Dried it on the balcony in the afternoon sun.",
+      "Two days in a paper bag on the desk was enough.",
+      "The bathroom one has made a noticeable difference.",
+      "Put one in the rice tin and it smells like a roastery."
+    ]
+  },
+  "rejections": [
+    "Grams are higher than the collection recorded for this employee.",
+    "Photo shows dried grounds but this activity needs wet grounds to work.",
+    "Duplicate of an earlier record for the same collection.",
+    "Not enough detail to validate the reuse. Please add what you did with the grounds."
+  ]
+}

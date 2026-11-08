@@ -24,6 +24,22 @@
     "activityKey": {
       "type": "string"
     },
+    "kind": {
+      "type": "string",
+      "description": "Post shape: reuse, progress, question or tip",
+      "enum": [
+        "reuse",
+        "progress",
+        "question",
+        "tip"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "purple",
+        "yellow"
+      ]
+    },
     "grams": {
       "type": "number"
     },
