@@ -5,15 +5,18 @@ import { IMG, HARBOURLINE_MARK } from "@/lib/assets";
 import Marquee from "@/components/cb/Marquee";
 import Ticket from "@/components/cb/Ticket";
 import Pill from "@/components/cb/Pill";
+import LoginGrid from "@/components/cb/LoginGrid";
 import { useSession } from "@/lib/session";
+import { useProgramme } from "@/lib/programmeData";
+import { formatSgt } from "@/lib/programme";
 
 const PHOTO_KEYS = ["plant", "mushrooms", "compost", "scrub", "deodoriser", "grounds", "plant", "compost"];
 
 const MARQUEE = [
-  "L11 is 285 g ahead of L10",
-  "8 more colleagues for L10 to hit 30%",
+  "L11 leads L10 by 5 g reused per employee",
+  "5 more colleagues for L10 to reach 30%",
   "next ground drop tue 10 nov · 10:00",
-  "L10 vs L11 challenge live",
+  "L10 vs L11 challenge live, 2 to 15 nov",
 ];
 
 function Preloader({ onDone }) {
@@ -65,7 +68,9 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const { signIn } = useSession();
+  const { reuses } = useProgramme();
   const reduce = useReducedMotion();
+  const validatedCount = reuses.filter((r) => r.status === "validated").length;
 
   const enter = (workEmail, role) => {
     signIn({ email: workEmail, role });
@@ -190,31 +195,15 @@ export default function Login() {
                     <Link to="/admin/login" className="text-sub underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
                       programme administrator? sign in here
                     </Link>
-                    <span className="text-sub">last updated 07 nov 2026, 09:14 sgt</span>
+                    <span className="text-sub">last updated {formatSgt(new Date())}</span>
                   </div>
                 </Ticket>
               </motion.div>
             </div>
           </div>
 
-          <div className="relative min-h-[320px] overflow-hidden lg:min-h-[640px]">
-            <img
-              src={IMG.table}
-              alt="A collection table with a lidded caddy of spent grounds and a kitchen scale"
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/60 to-transparent p-6">
-              <div className="text-[11px] uppercase leading-relaxed tracking-[0.16em] text-white/80">
-                collection table
-                <br />
-                marina bay · level 10
-              </div>
-              <div className="text-right text-[11px] uppercase tracking-[0.16em] text-white/80">
-                420 g available
-                <br />
-                next drop tue 10 nov
-              </div>
-            </div>
+          <div className="min-h-[320px] px-5 pb-14 pt-6 sm:px-10 lg:min-h-[640px] lg:pb-20">
+            <LoginGrid />
           </div>
         </div>
 
@@ -224,7 +213,7 @@ export default function Login() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className="display text-[28px] sm:text-[38px]">made by harbourline</h2>
             <p className="text-[13px] text-sub">
-              validated reuses this year · 312 &nbsp;·&nbsp; names withheld
+              validated reuses this year · {validatedCount} &nbsp;·&nbsp; names withheld
             </p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-[6px] sm:grid-cols-4">

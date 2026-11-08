@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useProgramme } from "@/lib/programmeData";
-import { floorByCode, monthLabel, formatSgt, monthKey } from "@/lib/programme";
+import { floorByCode, monthLabel, formatSgt } from "@/lib/programme";
 import { downloadCertificate } from "@/lib/certPdf";
 import { downloadCsv } from "@/lib/csv";
 import AdminTable from "@/components/admin/AdminTable";
@@ -21,7 +21,7 @@ const nextPeriodLabel = (period) => {
 };
 
 export default function AdminCertificates() {
-  const { certificates, rowsFor, me, setCertificateStatus, createCertificate } = useProgramme();
+  const { certificates, rowsFor, setCertificateStatus, createCertificate } = useProgramme();
   const [period, setPeriod] = useState("2026-10");
   const [office, setOffice] = useState("Marina Bay");
   const [preview, setPreview] = useState(null);
@@ -117,8 +117,6 @@ export default function AdminCertificates() {
   };
 
   const summaryCert = list.find((c) => c.type === "office");
-  void me;
-  void monthKey;
 
   return (
     <div className="space-y-5">

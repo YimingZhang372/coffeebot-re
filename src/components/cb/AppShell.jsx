@@ -3,6 +3,7 @@ import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSession } from "@/lib/session";
 import { useProgramme } from "@/lib/programmeData";
 import { IMG, HARBOURLINE_MARK } from "@/lib/assets";
+import { formatSgt } from "@/lib/programme";
 import GroundDropStrip from "./GroundDropStrip";
 import Ticker from "./Ticker";
 import MenuOverlay from "./MenuOverlay";
@@ -105,7 +106,7 @@ export default function AppShell() {
             <Link to="/about" className="hover:text-ink">Privacy</Link>
             <Link to="/about" className="hover:text-ink">Data retention policy</Link>
             <Link to="/about" className="hover:text-ink">Support</Link>
-            <span className="tabular">last updated 07 nov 2026, 09:14 sgt</span>
+            <span className="tabular">last updated {formatSgt(new Date())}</span>
           </div>
         </div>
       </footer>

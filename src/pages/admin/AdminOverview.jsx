@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line,
 } from "recharts";
 import { useProgramme } from "@/lib/programmeData";
-import { activityByKey, monthLabel } from "@/lib/programme";
+import { activityByKey, formatSgt, monthLabel } from "@/lib/programme";
 import AdminKpi from "@/components/admin/AdminKpi";
 import AdminTable from "@/components/admin/AdminTable";
 
@@ -45,7 +45,7 @@ export default function AdminOverview() {
         <div>
           <h1 className="text-[20px] font-semibold">Overview</h1>
           <p className="text-[12px] text-sub">
-            Marina Bay · {monthLabel(month)} · last updated 07 Nov 2026, 09:14 SGT
+            Marina Bay · {monthLabel(month)} · last updated {formatSgt(new Date())}
           </p>
         </div>
         <p className="text-[11px] uppercase tracking-[0.12em] text-sub">

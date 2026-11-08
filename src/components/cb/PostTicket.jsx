@@ -6,6 +6,9 @@ import Barcode from "./Barcode";
 import StatusChip from "./StatusChip";
 import PhotoUpload from "./PhotoUpload";
 import Pill from "./Pill";
+import CountUp from "./CountUp";
+import MentionText from "./MentionText";
+import { cropFor } from "@/lib/photoCrop";
 
 const REACTIONS = [
   { key: "appreciate", label: "appreciate" },
@@ -80,7 +83,12 @@ export default function PostTicket({ reuse, onClose }) {
           <div className="grid grid-cols-1 sm:grid-cols-[1.05fr_1fr]">
             <div className="bg-[#D6D2CD]">
               {photo ? (
-                <img src={photo} alt={`${activity.name} reuse`} className="h-full max-h-[420px] w-full object-cover" />
+                <img
+                  src={photo}
+                  alt={`${activity.name} reuse`}
+                  style={cropFor(post.refId).style}
+                  className="h-full max-h-[420px] w-full object-cover"
+                />
               ) : (
                 <div className="flex h-[240px] items-center justify-center text-[12px] uppercase tracking-[0.14em] text-sub">
                   no photo attached
@@ -89,7 +97,14 @@ export default function PostTicket({ reuse, onClose }) {
             </div>
             <div className="p-5">
               <p className="text-[11px] uppercase tracking-[0.14em] text-sub">
-                {activity.name} · {post.grams} g reused
+                {activity.name} ·{" "}
+                {post.grams
+                  ? `${post.grams} g reused`
+                  : post.kind === "question"
+                  ? "question to the other floors"
+                  : post.kind === "tip"
+                  ? "tip · no photo"
+                  : "no grams recorded"}
               </p>
               <h2 className="mt-2 text-[19px] leading-snug text-ink">{post.note}</h2>
               <p className="mt-2 text-[12px] text-sub">
@@ -136,7 +151,7 @@ export default function PostTicket({ reuse, onClose }) {
                       mine[r.key] ? "border-caramel bg-caramel/10 text-caramel" : "border-rule text-sub hover:border-ink hover:text-ink"
                     }`}
                   >
-                    {r.label} <span className="tabular">{counts[r.key] || 0}</span>
+                    {r.label} <CountUp value={counts[r.key] || 0} duration={500} />
                   </button>
                 ))}
               </div>
@@ -236,7 +251,7 @@ export default function PostTicket({ reuse, onClose }) {
                   <li key={c.id}>
                     <div className="flex items-start gap-2">
                       <span className="mt-0.5 text-[11px] uppercase tracking-[0.1em] text-sub">{c.floorCode} colleague</span>
-                      <p className="text-[13px] leading-relaxed text-ink">{c.body}</p>
+                      <MentionText text={c.body} className="text-[13px] leading-relaxed text-ink" />
                     </div>
                     <button
                       type="button"
@@ -249,7 +264,7 @@ export default function PostTicket({ reuse, onClose }) {
                       {replies.map((r) => (
                         <li key={r.id} className="flex items-start gap-2">
                           <span className="mt-0.5 text-[11px] uppercase tracking-[0.1em] text-sub">{r.floorCode} colleague</span>
-                          <p className="text-[13px] leading-relaxed text-ink">{r.body}</p>
+                          <MentionText text={r.body} className="text-[13px] leading-relaxed text-ink" />
                         </li>
                       ))}
                     </ul>

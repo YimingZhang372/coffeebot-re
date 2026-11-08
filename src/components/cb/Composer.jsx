@@ -4,13 +4,13 @@ import { useProgramme } from "@/lib/programmeData";
 import PhotoUpload from "./PhotoUpload";
 import Pill from "./Pill";
 
-export default function Composer({ onDone }) {
+export default function Composer({ onDone, prefill = "", autoOpen = false }) {
   const { me, submitReuse } = useProgramme();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen || !!prefill);
   const [photo, setPhoto] = useState("");
   const [activityKey, setActivityKey] = useState("plant");
   const [grams, setGrams] = useState("");
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(prefill);
   const [showName, setShowName] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);

@@ -1,7 +1,18 @@
 import { useState } from "react";
 import { activityByKey, timeAgo } from "@/lib/programme";
 import { useProgramme } from "@/lib/programmeData";
+import { cropFor } from "@/lib/photoCrop";
 import StatusChip from "./StatusChip";
+import CountUp from "./CountUp";
+import MentionText from "./MentionText";
+
+const KIND_LABEL = {
+  tip: "tip · no photo",
+  question: "question to the other floors",
+  progress: "progress · day 1 to day 10",
+};
+
+const authorLabel = (reuse) => (reuse.showName ? reuse.employeeName : `${reuse.floorCode} colleague`);
 
 export default function PostCard({ reuse, onOpen }) {
   const { comments, me, toggleReaction, reviewReuse } = useProgramme();
@@ -11,48 +22,55 @@ export default function PostCard({ reuse, onOpen }) {
   const postComments = comments
     .filter((c) => c.reuseRefId === reuse.refId)
     .sort((a, b) => (a.occurredAt > b.occurredAt ? 1 : -1));
+  const roots = postComments.filter((c) => !c.parentId).slice(-2);
   const canReview = me?.role === "champion" && reuse.floorCode === me.floorCode && reuse.status === "pending";
+  const kindLabel = KIND_LABEL[reuse.kind] || (reuse.grams ? `${reuse.grams} g reused` : "no photo");
 
   return (
     <article className="bg-paper transition-transform duration-200 hover:-translate-y-[2px]">
       <button type="button" onClick={() => onOpen(reuse)} className="block w-full text-left">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#D6D2CD]">
-          {reuse.photoUrl ? (
+        {reuse.photoUrl ? (
+          <div className="relative aspect-[4/5] overflow-hidden bg-[#D6D2CD]">
             <img
               src={reuse.photoUrl}
               alt={`${activity.name} reuse on ${reuse.floorCode}`}
-              className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+              style={cropFor(reuse.refId).style}
+              className="h-full w-full object-cover"
             />
-          ) : (
-            <div className="flex h-full items-center justify-center text-[11px] uppercase tracking-[0.14em] text-sub">
-              no photo
+            <div className="absolute left-3 top-3 flex items-center gap-2">
+              <StatusChip status={reuse.status} className="bg-white/90">
+                {reuse.status === "pending" ? "pending validation" : reuse.status}
+              </StatusChip>
             </div>
-          )}
-          <div className="absolute left-3 top-3 flex items-center gap-2">
-            <StatusChip status={reuse.status} className="bg-white/90">
-              {reuse.status === "pending" ? "pending validation" : reuse.status}
-            </StatusChip>
+            <div className="absolute bottom-3 left-3 text-[11px] uppercase tracking-[0.14em] text-white">
+              <span className="bg-ink/70 px-2 py-1">{reuse.floorCode} · {activity.name}</span>
+            </div>
           </div>
-          <div className="absolute bottom-3 left-3 text-[11px] uppercase tracking-[0.14em] text-white">
-            <span className="bg-ink/70 px-2 py-1">{reuse.floorCode} · {activity.name}</span>
+        ) : (
+          <div className="relative flex min-h-[132px] flex-col justify-between border-b border-rule bg-[#F1EEEA] p-4">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-sub">{reuse.floorCode} · {kindLabel}</span>
+            <p className="mt-3 text-[14px] leading-relaxed text-ink">{reuse.note}</p>
           </div>
-        </div>
+        )}
       </button>
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-[13px] text-ink">
-              {reuse.showName ? reuse.employeeName : `${reuse.floorCode} colleague`}
-            </p>
-            <p className="text-[11px] uppercase tracking-[0.12em] text-sub">
-              {reuse.grams} g reused · {timeAgo(reuse.occurredAt)}
-            </p>
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DFDBD6] text-[10px] uppercase tracking-[0.06em] text-ink">
+              {authorLabel(reuse).split(" ").slice(0, 2).map((p) => p[0]).join("")}
+            </span>
+            <div>
+              <p className="text-[13px] text-ink">{authorLabel(reuse)}</p>
+              <p className="text-[11px] uppercase tracking-[0.12em] text-sub">
+                {kindLabel} · {timeAgo(reuse.occurredAt)}
+              </p>
+            </div>
           </div>
           <span className="text-[11px] tabular text-sub">{reuse.refId}</span>
         </div>
 
-        <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-ink">{reuse.note}</p>
+        {reuse.photoUrl && <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-ink">{reuse.note}</p>}
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {[
@@ -71,7 +89,7 @@ export default function PostCard({ reuse, onOpen }) {
                 mine[r.key] ? "border-caramel bg-caramel/10 text-caramel" : "border-rule text-sub hover:border-ink hover:text-ink"
               }`}
             >
-              {r.label} <span className="tabular">{counts[r.key] || 0}</span>
+              {r.label} <CountUp value={counts[r.key] || 0} duration={500} />
             </button>
           ))}
           <button type="button" onClick={() => onOpen(reuse)} className="ml-auto text-[11px] text-sub hover:text-ink">
@@ -79,12 +97,23 @@ export default function PostCard({ reuse, onOpen }) {
           </button>
         </div>
 
-        {postComments.length > 0 && (
+        {roots.length > 0 && (
           <ul className="mt-3 space-y-1.5 border-t border-rule pt-3">
-            {postComments.slice(-2).map((c) => (
+            {roots.map((c) => (
               <li key={c.id} className="text-[12px] leading-relaxed">
-                <span className="uppercase tracking-[0.1em] text-sub">{c.floorCode} colleague</span>{" "}
-                <span className="text-ink">{c.body}</span>
+                <span className="uppercase tracking-[0.1em] text-sub">
+                  {c.employeeName && c.floorCode ? `${c.floorCode} champion` : `${c.floorCode} colleague`}
+                </span>{" "}
+                <MentionText text={c.body} className="text-ink" />
+                {postComments
+                  .filter((r) => r.parentId === c.id)
+                  .slice(-1)
+                  .map((r) => (
+                    <span key={r.id} className="mt-1 block border-l border-rule pl-2 text-[11.5px] text-sub">
+                      <span className="uppercase tracking-[0.1em]">{r.floorCode} colleague</span>{" "}
+                      <MentionText text={r.body} />
+                    </span>
+                  ))}
               </li>
             ))}
             <li>

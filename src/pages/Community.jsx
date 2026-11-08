@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useProgramme } from "@/lib/programmeData";
 import { ACTIVITIES, FLOORS, activityByKey } from "@/lib/programme";
 import { publicNudges } from "@/lib/metrics";
-import { monthLabel } from "@/lib/programme";
+import { monthLabel, formatSgt } from "@/lib/programme";
 import Composer from "@/components/cb/Composer";
 import PostCard from "@/components/cb/PostCard";
 import PostTicket from "@/components/cb/PostTicket";
@@ -13,6 +13,8 @@ import EmptyState from "@/components/cb/EmptyState";
 import NudgeList from "@/components/cb/NudgeList";
 import Pill from "@/components/cb/Pill";
 import Marquee from "@/components/cb/Marquee";
+import WelcomeCard from "@/components/cb/WelcomeCard";
+import ChampionCard from "@/components/cb/ChampionCard";
 import { marqueeItems } from "@/lib/metrics";
 
 const TABS = ["Feed", "Gallery", "Challenges"];
@@ -29,7 +31,15 @@ export default function Community() {
   const [sort, setSort] = useState("latest");
   const [openPost, setOpenPost] = useState(null);
   const [galleryFloor, setGalleryFloor] = useState("");
+  const [composer, setComposer] = useState({ key: 0, open: false, prefill: "" });
   const reduce = useReducedMotion();
+
+  const openComposer = (prefill = "") => {
+    setComposer((c) => ({ key: c.key + 1, open: true, prefill }));
+    requestAnimationFrame(() => {
+      document.getElementById("composer-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
 
   const monthReuses = useMemo(
     () => reuses.filter((r) => r.occurredAt.slice(0, 7) === month),
@@ -81,6 +91,10 @@ export default function Community() {
     return [...set].slice(0, 8);
   }, [reuses, me, weekAgo]);
 
+  const lastFloorPost = reuses
+    .filter((r) => r.floorCode === me?.floorCode && r.status === "validated")
+    .sort((a, b) => (a.occurredAt < b.occurredAt ? 1 : -1))[0];
+
   const activeChallenge = challenges.find((c) => c.status === "active");
   const marquee = marqueeItems({ rows, myRow, nextDropLabel: "tue 10 nov · 10:00", challenge: activeChallenge });
 
@@ -92,10 +106,12 @@ export default function Community() {
           <h1 className="display mt-3 text-[54px] sm:text-[88px]">community.</h1>
         </div>
         <p className="max-w-[42ch] text-[13px] leading-relaxed text-sub">
-          Forty reuses reported by colleagues across six floors. Posts appear as a floor by default; names are
-          opt-in per post. Proof photos never appear here.
+          {reuses.filter((r) => r.status === "validated").length} reuses reported by colleagues across six floors.
+          Posts appear as a floor by default; names are opt-in per post. Proof photos never appear here.
         </p>
       </div>
+
+      <WelcomeCard onShare={() => openComposer("")} />
 
       <Marquee items={marquee} className="-mx-5 sm:-mx-8" speed={58} />
 
@@ -146,7 +162,11 @@ export default function Community() {
                     </span>
                   ))
                 ) : (
-                  <span className="text-[12px] text-sub">No validated reuse on your floor this week.</span>
+                  <span className="text-[12px] text-sub">
+                    {lastFloorPost
+                      ? `No reuse yet this week. Last activity ${formatSgt(lastFloorPost.occurredAt, false)}.`
+                      : "No activity on your floor yet."}
+                  </span>
                 )}
               </div>
               {me?.role === "champion" && (
@@ -188,7 +208,7 @@ export default function Community() {
                       </div>
                       {r.code === me?.floorCode && above && (
                         <p className="text-[11px] text-sub">
-                          {Math.round((above.perEmployee - r.perEmployee) * r.eligible)} g behind {above.code}
+                          {Math.max(1, Math.round(above.perEmployee - r.perEmployee))} g per employee behind {above.code}
                         </p>
                       )}
                     </li>
@@ -199,7 +219,9 @@ export default function Community() {
           </aside>
 
           <div className="space-y-5">
-            <Composer />
+            <div id="composer-card">
+              <Composer key={composer.key} autoOpen={composer.open} prefill={composer.prefill} />
+            </div>
 
             {queue.length > 0 && (
               <div className="border border-dashed border-caramel/60 bg-caramel/5 px-4 py-3">
@@ -278,7 +300,7 @@ export default function Community() {
 
           <aside className="space-y-5">
             <div>
-              <p className="border-b border-rule pb-2 text-[11px] uppercase tracking-[0.14em] text-sub">this week on your floor</p>
+              <p className="border-b border-rule pb-2 text-[11px] uppercase tracking-[0.14em] text-sub">this month on your floor</p>
               <ul className="mt-2 space-y-1.5 text-[12px] text-sub">
                 <li className="flex justify-between">
                   <span>posts validated</span>
@@ -316,6 +338,8 @@ export default function Community() {
                 {!trending.length && <li className="text-[12px] text-sub">Nothing validated yet this month.</li>}
               </ul>
             </div>
+
+            <ChampionCard onAsk={(floor) => openComposer(`@${floor} `)} />
 
             <NudgeList items={publicNudges({ rows, myRow, monthLabel: monthLabel(month), daysLeft: 22 }).slice(0, 2)} />
           </aside>

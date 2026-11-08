@@ -1,11 +1,12 @@
 import { jsPDF } from "jspdf";
 import { IMG } from "./assets";
 import { formatSgt } from "./programme";
+import { certMeta, certRows } from "./certModel";
 
 const INK = [20, 20, 20];
 const SUB = [110, 106, 102];
 const RULE = [207, 203, 198];
-const CARAMEL = [185, 135, 90];
+const AMBER = [150, 112, 60];
 const GREEN = [94, 125, 90];
 
 function hash(str) {
@@ -33,35 +34,32 @@ function drawBarcode(doc, id, x, y, w, h) {
   let cursor = x;
   let i = 0;
   while (cursor < x + w - 1) {
-    const barW = rand() > 0.72 ? 0.9 : rand() > 0.4 ? 0.55 : 0.3;
+    const barW = rand() > 0.72 ? 0.85 : rand() > 0.4 ? 0.5 : 0.28;
     if (i % 2 === 0) {
       doc.setFillColor(...INK);
       doc.rect(cursor, y, barW, h, "F");
     }
-    cursor += barW + 0.35;
+    cursor += barW + 0.32;
     i += 1;
   }
-  doc.setFontSize(6);
-  doc.setTextColor(...SUB);
-  doc.text(id, x, y + h + 3);
 }
 
 /** Deterministic verification matrix — encodes the certificate ID string. */
-function drawVerificationMatrix(doc, id, x, y, size = 20) {
+function drawVerificationMatrix(doc, id, x, y, size = 16) {
   const cells = 21;
   const cell = size / cells;
   const rand = prng(hash(`verify-${id}`));
   doc.setFillColor(255, 255, 255);
   doc.rect(x, y, size, size, "F");
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.2);
+  doc.rect(x, y, size, size, "S");
+  doc.setFillColor(...INK);
   for (let r = 0; r < cells; r++) {
     for (let c = 0; c < cells; c++) {
-      const finder =
-        (r < 7 && c < 7) || (r < 7 && c >= cells - 7) || (r >= cells - 7 && c < 7);
+      const finder = (r < 7 && c < 7) || (r < 7 && c >= cells - 7) || (r >= cells - 7 && c < 7);
       if (finder) continue;
-      if (rand() > 0.52) {
-        doc.setFillColor(...INK);
-        doc.rect(x + c * cell, y + r * cell, cell, cell, "F");
-      }
+      if (rand() > 0.52) doc.rect(x + c * cell, y + r * cell, cell, cell, "F");
     }
   }
   const eye = (ox, oy) => {
@@ -75,6 +73,20 @@ function drawVerificationMatrix(doc, id, x, y, size = 20) {
   eye(x, y);
   eye(x + cell * (cells - 7), y);
   eye(x, y + cell * (cells - 7));
+}
+
+function drawChip(doc, label, x, y) {
+  const colour = label === "Validated" ? GREEN : label === "Reported" ? AMBER : INK;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.6);
+  const text = label.toUpperCase();
+  const w = doc.getTextWidth(text) + 3.2;
+  doc.setDrawColor(...colour);
+  doc.setLineWidth(0.22);
+  doc.roundedRect(x, y - 2.5, w, 3.4, 1.7, 1.7, "S");
+  doc.setTextColor(...colour);
+  doc.text(text, x + 1.6, y);
+  return w;
 }
 
 async function tryImage(url) {
@@ -98,194 +110,187 @@ async function tryImage(url) {
   });
 }
 
-async function header(doc, pageW, title) {
+async function header(doc, pageW, isOffice) {
   const logo = await tryImage(IMG.logo);
   if (logo) {
-    const h = 9;
+    const h = 10;
     const w = (logo.w / logo.h) * h;
     try {
-      doc.addImage(logo.data, "PNG", 18, 12, w, h);
+      doc.addImage(logo.data, "PNG", 16, 11, w, h);
     } catch {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
       doc.setTextColor(...INK);
-      doc.text("CoffeeBot", 18, 19);
+      doc.text("CoffeeBot", 16, 19);
     }
   } else {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
     doc.setTextColor(...INK);
-    doc.text("CoffeeBot", 18, 19);
+    doc.text("CoffeeBot", 16, 19);
   }
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(6.6);
   doc.setTextColor(...SUB);
-  doc.text("COFFEEBOT OPERATIONS · SINGAPORE", 18, 25);
+  doc.text("COFFEEBOT OPERATIONS, SINGAPORE", 16, 25.5);
 
   doc.setDrawColor(...RULE);
-  doc.setLineWidth(0.3);
-  doc.rect(pageW - 78, 13, 60, 11);
-  doc.setFontSize(7.5);
+  doc.setLineWidth(0.2);
+  doc.rect(pageW - 76, 11, 58, 9.5);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.6);
   doc.setTextColor(...INK);
-  doc.text("HARBOURLINE BANK", pageW - 72, 20);
-
-  doc.setFontSize(7);
+  doc.text("HARBOURLINE BANK", pageW - 72, 17.2);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.4);
   doc.setTextColor(...SUB);
-  doc.text(title, pageW - 78, 31);
+  doc.text("Deployed at Harbourline Bank", pageW - 76, 25.5);
+  doc.text(isOffice ? "Office ESG summary" : "Sustainability certificate", pageW - 76, 29);
 }
 
 export async function downloadCertificate(cert, opts = {}) {
-  const isEmployee = cert.type === "employee";
-  const doc = new jsPDF({ orientation: isEmployee ? "portrait" : "landscape", unit: "mm", format: "a4" });
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
-  const left = 18;
-  const right = pageW - 18;
+  const left = 16;
+  const right = pageW - 16;
   const usable = right - left;
+  const meta = certMeta(cert);
+  const rows = certRows(cert);
 
-  await header(doc, pageW, isEmployee ? "Employee certificate" : "Sustainability certificate");
+  // ticket frame + perforation
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(9, 7, pageW - 18, pageH - 14, 2, 2, "S");
+  doc.setLineDashPattern([1.4, 1.4], 0);
+  doc.line(pageW - 12, 12, pageW - 12, pageH - 12);
+  doc.setLineDashPattern([], 0);
 
-  // ---- title block, above the table, never inside it ----
-  let y = 42;
+  await header(doc, pageW, cert.type === "office");
+
+  let y = 44;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(...SUB);
-  doc.text(
-    cert.type === "office" ? "OFFICE ESG SUMMARY CERTIFICATE" : isEmployee ? "EMPLOYEE CERTIFICATE" : "FLOOR CERTIFICATE",
-    left,
-    y
-  );
-  y += 9;
+  doc.text(meta.kicker.toUpperCase(), left, y);
+  y += 8;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(isEmployee ? 18 : 21);
+  doc.setFontSize(20);
   doc.setTextColor(...INK);
-  const heading =
-    cert.type === "office"
-      ? `Marina Bay · all floors`
-      : isEmployee
-      ? opts.employeeName || "Employee"
-      : `${cert.floorCode} · ${opts.floorName || ""}`.trim();
-  doc.text(heading, left, y);
-  y += 7;
+  doc.text(meta.title, left, y);
+  y += 6;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(...SUB);
-  doc.text(
-    `${cert.office} · ${cert.periodLabel} · GRI 306-4 Waste diverted from disposal — preparation for reuse`,
-    left,
-    y
-  );
-  y += 5;
+  doc.text(meta.subtitle, left, y);
+  y += 4;
   doc.setDrawColor(...RULE);
   doc.setLineWidth(0.4);
   doc.line(left, y, right, y);
 
-  // ---- table: 30 / 25 / 45 ----
-  const gap = 6;
-  const colMeasure = usable * 0.3 - gap;
-  const colValue = usable * 0.25 - gap;
-  const colEvidence = usable * 0.45 - gap;
+  // table 30 / 25 / 45
+  const gap = 5;
   const xMeasure = left;
   const xValue = left + usable * 0.3;
   const xEvidence = left + usable * 0.55;
+  const colMeasure = usable * 0.3 - gap;
+  const colValue = usable * 0.25 - gap;
+  const colEvidence = usable * 0.45 - gap;
 
   y += 8;
-  doc.setFontSize(7);
+  doc.setFontSize(6.6);
   doc.setTextColor(...SUB);
   doc.text("MEASURE", xMeasure, y);
   doc.text("VALUE", xValue, y);
   doc.text("EVIDENCE / BASIS", xEvidence, y);
-  y += 3;
+  y += 2.6;
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.3);
   doc.line(left, y, right, y);
-  y += 6;
+  y += 5.4;
 
-  const rate = Number.isFinite(cert.reuseRate) ? `${cert.reuseRate.toFixed(1)}%` : "—";
-  const rows = isEmployee
-    ? [
-        ["Kg wet grounds collected", `${Number(cert.kgCollected || 0).toFixed(2)} kg`, "Weighed at the floor collection table by the employee"],
-        ["Kg grounds reused", `${Number(cert.kgReused || 0).toFixed(2)} kg`, "Reported by the employee · validated by the Floor Champion"],
-        ["Reuse rate", rate, "Reused ÷ collected for the quarter"],
-        ["Activities completed", String(cert.activitiesDone || 0), "Validated reuse records in the quarter"],
-        ["Volunteering hours earned", `${Number(cert.volunteeringHours || 0).toFixed(1)} h`, "1 validated activity = 0.5 h, per programme rules"],
-        ["Next quarter target", cert.nextTarget || "—", "Set by Group Sustainability"],
-      ]
-    : [
-        ["Kg wet grounds collected", `${Number(cert.kgCollected || 0).toFixed(2)} kg`, "Weighed at the collection table on each Ground Drop day"],
-        ["Kg grounds reused", `${Number(cert.kgReused || 0).toFixed(2)} kg`, "Reported by employees · validated by the Floor Champion"],
-        ["Reuse rate", rate, "Reused ÷ collected for the period"],
-        ["Rank", cert.rank ? `${cert.rank} of 6` : "—", "kg reused per employee, all Marina Bay floors"],
-        ["Next target", (cert.nextTarget || "").split(" · ")[0] || "—", "Set by Group Sustainability for November 2026"],
-        ["Avoided emissions", "Methodology pending", "Not reported for this period"],
-      ];
-
-  const lineH = 4.2;
+  const lineH = 3.5;
   rows.forEach((row) => {
-    const measureLines = doc.splitTextToSize(row[0], colMeasure);
-    const valueLines = doc.splitTextToSize(row[1], colValue);
-    const evidenceLines = doc.splitTextToSize(row[2], colEvidence);
-    const lines = Math.max(measureLines.length, valueLines.length, evidenceLines.length);
-    const rowH = lines * lineH + 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(5.6);
+    const chipW = doc.getTextWidth(row.chip.toUpperCase()) + 3.2;
+    const evidenceWidth = colEvidence - chipW - 2;
 
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
+    const measureLines = doc.splitTextToSize(row.measure, colMeasure);
+    const valueLines = doc.splitTextToSize(row.value, colValue);
+    doc.setFontSize(7.2);
+    const evidenceLines = doc.splitTextToSize(row.evidence, Math.max(28, evidenceWidth));
+    const lines = Math.max(measureLines.length, valueLines.length, evidenceLines.length);
+    const rowH = lines * lineH + 4.4;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
     doc.setTextColor(...INK);
     doc.text(measureLines, xMeasure, y);
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.6);
     doc.text(valueLines, xValue, y);
+
+    drawChip(doc, row.chip, xEvidence, y);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.8);
+    doc.setFontSize(7.2);
     doc.setTextColor(...SUB);
-    doc.text(evidenceLines, xEvidence, y);
+    doc.text(evidenceLines, xEvidence + chipW + 2, y);
 
     y += rowH;
     doc.setDrawColor(...RULE);
-    doc.setLineWidth(0.2);
-    doc.line(left, y - 3.5, right, y - 3.5);
-    void rowH;
+    doc.setLineWidth(0.18);
+    doc.line(left, y - 3.4, right, y - 3.4);
   });
 
-  // ---- signatures ----
-  const sigY = Math.min(pageH - 42, y + 10);
-  doc.setDrawColor(...INK);
-  doc.setLineWidth(0.3);
-  doc.line(left, sigY, left + 62, sigY);
-  doc.line(pageW / 2 - 31, sigY, pageW / 2 + 31, sigY);
+  // signatures (left) and verification (right) share one band, so they never overlap
+  const sigY = Math.min(Math.max(y + 14, 156), 170);
+  const sigWidth = 54;
+  meta.signatures.forEach((sig, i) => {
+    const x = left + i * (sigWidth + 9);
+    doc.setDrawColor(...INK);
+    doc.setLineWidth(0.25);
+    doc.line(x, sigY, x + sigWidth, sigY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...INK);
+    doc.text(sig.name, x, sigY + 4.4);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.6);
+    doc.setTextColor(...SUB);
+    doc.text(sig.title, x, sigY + 7.8);
+    doc.text(sig.date ? formatSgt(sig.date, false) : "Not yet issued", x, sigY + 11);
+  });
 
-  doc.setFontSize(8);
+  const vx = right - 74;
+  drawVerificationMatrix(doc, cert.certId, vx, sigY - 2, 16);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.4);
+  doc.setTextColor(...SUB);
+  doc.text("Scan to verify", vx, sigY + 17);
+  doc.setFontSize(6);
   doc.setTextColor(...INK);
-  doc.text("CoffeeBot Operations", left, sigY + 5);
-  doc.setFontSize(7);
-  doc.setTextColor(...SUB);
-  doc.text("Authorised on behalf of CoffeeBot Pte Ltd", left, sigY + 9);
+  doc.text(`/verify/${cert.certId}`, vx, sigY + 20.4);
 
-  doc.setFontSize(8);
-  doc.setTextColor(...INK);
-  doc.text("Head of Sustainability, Harbourline Bank", pageW / 2 - 31, sigY + 5);
-  doc.setFontSize(7);
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.2);
+  doc.rect(vx + 22, sigY - 2, 52, 12);
+  drawBarcode(doc, cert.certId, vx + 23.5, sigY - 0.5, 49, 9);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.6);
   doc.setTextColor(...SUB);
-  doc.text(`Issued ${cert.issuedAt ? formatSgt(cert.issuedAt) : "—"}`, pageW / 2 - 31, sigY + 9);
+  doc.text(cert.certId, vx + 22, sigY + 14.4);
+  doc.text(`Status: ${cert.status}`, vx + 22, sigY + 17.6);
+  doc.text(cert.type === "office" ? "Marina Bay office" : `${cert.floorCode} floor`, vx + 22, sigY + 20.4);
 
-  // ---- verification block, bottom right ----
-  const vx = right - 62;
-  drawVerificationMatrix(doc, cert.certId, vx, pageH - 46, 18);
-  doc.setFontSize(6.5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.8);
   doc.setTextColor(...SUB);
-  doc.text("Scan to verify", vx, pageH - 25);
-  doc.setFontSize(7.5);
-  doc.setTextColor(...INK);
-  doc.text(cert.certId, vx, pageH - 20);
-  doc.setFontSize(6.5);
-  doc.setTextColor(...SUB);
-  doc.text(`/verify/${cert.certId}`, vx, pageH - 16);
+  doc.text("CoffeeBot Re v2.3 · Evidence levels: weighed at collection, reported by employees, validated by the Floor Champion", left, pageH - 11);
+  doc.text(cert.certId + " · " + cert.periodLabel, right - 52, pageH - 11);
 
-  drawBarcode(doc, cert.certId, vx - 58, pageH - 44, 52, 12);
-
-  doc.setFontSize(6.5);
-  doc.setTextColor(...SUB);
-  doc.text("CoffeeBot Re v2.3 · Evidence levels: Weighed / Reported / Validated", left, pageH - 14);
-  if (cert.type !== "employee") {
-    doc.text("Avoided emissions: methodology pending", left, pageH - 10);
-  }
-
+  void opts;
   doc.save(`${cert.certId}.pdf`);
 }
 
@@ -304,7 +309,7 @@ export function buildFloorCert({ floorCode, floorName, office, period, periodLab
     kgReused: Number(reused.toFixed(2)),
     reuseRate: rows.collected ? Number(((rows.reused / rows.collected) * 100).toFixed(1)) : 0,
     rank,
-    nextTarget: `${(reused * 1.15).toFixed(2)} kg reused · Set by Group Sustainability for November 2026`,
+    nextTarget: `${(reused * 1.15).toFixed(2)} kg reused · Set by Group Sustainability for the following month`,
     status: status || "draft",
     issuedAt: issuedAt || "",
     activitiesDone: rows.posts || 0,
