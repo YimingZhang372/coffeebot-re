@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ACTIVITIES, IMG, floorLabel } from "@/lib/programme";
+import { ACTIVITIES } from "@/lib/programme";
+import { IMG } from "@/lib/assets";
 import { useProgramme } from "@/lib/programmeData";
 import Pill from "@/components/cb/Pill";
 

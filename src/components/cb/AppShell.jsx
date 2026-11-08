@@ -26,7 +26,8 @@ export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
-  if (!session?.email) return <Navigate to="/login" replace />;
+  const isPublic = location.pathname === "/about";
+  if (!session?.email && !isPublic) return <Navigate to="/login" replace />;
   if (loading) {
     return (
       <div className="min-h-screen bg-canvas px-5 py-8 sm:px-8">

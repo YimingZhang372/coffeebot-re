@@ -6,13 +6,62 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import { SessionProvider } from '@/lib/session';
+import { ProgrammeProvider } from '@/lib/programmeData';
 // Add page imports here
 import Login from '@/pages/Login';
+import AdminLogin from '@/pages/AdminLogin';
+import Home from '@/pages/Home';
+import Collect from '@/pages/Collect';
+import Activities from '@/pages/Activities';
+import Community from '@/pages/Community';
+import Leaderboard from '@/pages/Leaderboard';
+import Me from '@/pages/Me';
+import About from '@/pages/About';
+import Demo from '@/pages/Demo';
+import Welcome from '@/pages/Welcome';
+import Verify from '@/pages/Verify';
+import AppShell from '@/components/cb/AppShell';
+import AdminShell from '@/components/admin/AdminShell';
+import AdminOverview from '@/pages/admin/AdminOverview';
+import AdminActivity from '@/pages/admin/AdminActivity';
+import AdminFloors from '@/pages/admin/AdminFloors';
+import AdminTables from '@/pages/admin/AdminTables';
+import AdminCertificates from '@/pages/admin/AdminCertificates';
+import AdminEmail from '@/pages/admin/AdminEmail';
+import AdminCarbon from '@/pages/admin/AdminCarbon';
+import AdminSettings from '@/pages/admin/AdminSettings';
+import AdminAudit from '@/pages/admin/AdminAudit';
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Login />} />
     <Route path="/login" element={<Login />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+    <Route path="/demo" element={<Demo />} />
+    <Route path="/verify/:certificateId" element={<Verify />} />
+
+    <Route element={<AppShell />}>
+      <Route path="/" element={<Home />} />
+      <Route path="/collect" element={<Collect />} />
+      <Route path="/activities" element={<Activities />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/me" element={<Me />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/welcome" element={<Welcome />} />
+    </Route>
+
+    <Route path="/admin" element={<AdminShell />}>
+      <Route index element={<AdminOverview />} />
+      <Route path="activity" element={<AdminActivity />} />
+      <Route path="floors" element={<AdminFloors />} />
+      <Route path="tables" element={<AdminTables />} />
+      <Route path="certificates" element={<AdminCertificates />} />
+      <Route path="email" element={<AdminEmail />} />
+      <Route path="carbon" element={<AdminCarbon />} />
+      <Route path="settings" element={<AdminSettings />} />
+      <Route path="audit" element={<AdminAudit />} />
+    </Route>
+
     <Route path="*" element={<PageNotFound />} />
   </Routes>
 );
@@ -22,11 +71,13 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <SessionProvider>
-          <Router>
-            <ScrollToTop />
-            <AppRoutes />
-          </Router>
-          <Toaster />
+          <ProgrammeProvider>
+            <Router>
+              <ScrollToTop />
+              <AppRoutes />
+            </Router>
+            <Toaster />
+          </ProgrammeProvider>
         </SessionProvider>
       </QueryClientProvider>
     </AuthProvider>
