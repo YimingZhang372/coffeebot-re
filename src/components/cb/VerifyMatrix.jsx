@@ -28,14 +28,14 @@ export default function VerifyMatrix({ value, size = 78, className = "" }) {
     for (let c = 0; c < cells; c += 1) {
       const finder = (r < 7 && c < 7) || (r < 7 && c >= cells - 7) || (r >= cells - 7 && c < 7);
       if (finder) continue;
-      if (rand() > 0.52) squares.push(<rect key={`${r}-${c}`} x={c * cell} y={r * cell} width={cell} height={cell} fill="hsl(var(--cb-ink))" />);
+      if (rand() > 0.52) squares.push(<rect key={`${r}-${c}`} x={c * cell} y={r * cell} width={cell} height={cell} fill="#141414" />);
     }
   }
   const eye = (ox, oy, key) => (
     <g key={key}>
-      <rect x={ox} y={oy} width={cell * 7} height={cell * 7} fill="hsl(var(--cb-ink))" />
+      <rect x={ox} y={oy} width={cell * 7} height={cell * 7} fill="#141414" />
       <rect x={ox + cell} y={oy + cell} width={cell * 5} height={cell * 5} fill="#fff" />
-      <rect x={ox + cell * 2} y={oy + cell * 2} width={cell * 3} height={cell * 3} fill="hsl(var(--cb-ink))" />
+      <rect x={ox + cell * 2} y={oy + cell * 2} width={cell * 3} height={cell * 3} fill="#141414" />
     </g>
   );
   return (

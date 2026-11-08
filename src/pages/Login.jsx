@@ -14,7 +14,7 @@ const PHOTO_KEYS = ["plant", "mushrooms", "compost", "scrub", "deodoriser", "gro
 
 const MARQUEE = [
   "L11 leads L10 by 5 g reused per employee",
-  "5 more colleagues for L10 to reach 30%",
+  "4 more colleagues for L10 to reach 30%",
   "next ground drop tue 10 nov · 10:00",
   "L10 vs L11 challenge live, 2 to 15 nov",
 ];

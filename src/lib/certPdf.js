@@ -149,13 +149,14 @@ async function header(doc, pageW, isOffice) {
 }
 
 export async function downloadCertificate(cert, opts = {}) {
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const isEmployee = cert.type === "employee";
+  const doc = new jsPDF({ orientation: isEmployee ? "portrait" : "landscape", unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const left = 16;
   const right = pageW - 16;
   const usable = right - left;
-  const meta = certMeta(cert);
+  const meta = certMeta(cert, opts);
   const rows = certRows(cert);
 
   // ticket frame + perforation
@@ -245,7 +246,7 @@ export async function downloadCertificate(cert, opts = {}) {
   });
 
   // signatures (left) and verification (right) share one band, so they never overlap
-  const sigY = Math.min(Math.max(y + 14, 156), 170);
+  const sigY = Math.min(Math.max(y + 14, pageH - 54), pageH - 40);
   const sigWidth = 54;
   meta.signatures.forEach((sig, i) => {
     const x = left + i * (sigWidth + 9);
@@ -290,7 +291,6 @@ export async function downloadCertificate(cert, opts = {}) {
   doc.text("CoffeeBot Re v2.3 · Evidence levels: weighed at collection, reported by employees, validated by the Floor Champion", left, pageH - 11);
   doc.text(cert.certId + " · " + cert.periodLabel, right - 52, pageH - 11);
 
-  void opts;
   doc.save(`${cert.certId}.pdf`);
 }
 

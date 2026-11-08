@@ -90,7 +90,7 @@ export function publicNudges({ rows, myRow, monthLabel, daysLeft }) {
 
 export function marqueeItems({ rows, myRow, nextDropLabel, challenge }) {
   const items = [];
-  if (rows[0]) items.push(`${rows[0].code} leads the office on kg per employee`);
+  if (rows[0]) items.push(`${rows[0].code} leads the office on g reused per employee`);
   if (myRow) {
     const idx = rows.findIndex((r) => r.code === myRow.code);
     const above = rows[idx - 1];

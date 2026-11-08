@@ -12,6 +12,7 @@ const greeting = () => {
 export default function WelcomeCard({ onShare }) {
   const { me, myRow, reuses } = useProgramme();
   const floor = me?.floorCode || myRow?.code;
+  const floorName = floor || "your floor";
   const firstName = (me?.name || "").split(" ")[0] || "there";
   const weekAgo = Date.now() - 7 * 86400000;
 
@@ -27,17 +28,17 @@ export default function WelcomeCard({ onShare }) {
   return (
     <section className="flex flex-wrap items-end justify-between gap-5 bg-ink px-5 py-5 text-white sm:px-6">
       <div>
-        <p className="text-[11px] uppercase tracking-[0.18em] text-white/50">community · {floor || "your floor"}</p>
+        <p className="text-[11px] uppercase tracking-[0.18em] text-white/50">community · {floorName}</p>
         <p className="mt-2 text-[19px] leading-snug text-white">
           {greeting()}, {firstName}.{" "}
           {thisWeek.length ? (
             <>
-              {floor} shared {thisWeek.length} {thisWeek.length === 1 ? "reuse" : "reuses"} this week,{" "}
+              {floorName} shared {thisWeek.length} {thisWeek.length === 1 ? "reuse" : "reuses"} this week,{" "}
               {needed ? `${needed} ${needed === 1 ? "colleague" : "colleagues"} away from ${target}%` : `${target}% participation reached`}.
             </>
           ) : (
             <>
-              No validated reuse on {floor} this week.{" "}
+              No validated reuse on {floorName} this week.{" "}
               {last ? `Last activity was ${formatSgt(last.occurredAt, false)}.` : "You would be the first this month."}
             </>
           )}
