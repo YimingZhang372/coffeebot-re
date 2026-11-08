@@ -1,0 +1,66 @@
+{
+  "name": "Collection",
+  "type": "object",
+  "properties": {
+    "refId": {
+      "type": "string",
+      "description": "Collection reference, e.g. COL-2026-0031"
+    },
+    "employeeEmail": {
+      "type": "string"
+    },
+    "employeeName": {
+      "type": "string"
+    },
+    "employeeRef": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "office": {
+      "type": "string"
+    },
+    "grams": {
+      "type": "number"
+    },
+    "evidenceLevel": {
+      "type": "string",
+      "enum": [
+        "Weighed",
+        "Reported"
+      ],
+      "enumColors": [
+        "green",
+        "yellow"
+      ]
+    },
+    "proofPhotoUrl": {
+      "type": "string"
+    },
+    "tableStatus": {
+      "type": "string"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "groundDropDate": {
+      "type": "string"
+    },
+    "needsReview": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "refId",
+    "grams",
+    "floorCode"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

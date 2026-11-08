@@ -1,0 +1,59 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "recipientEmail": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "like",
+        "comment",
+        "validation",
+        "reminder",
+        "nudge",
+        "mention",
+        "floor"
+      ],
+      "enumColors": [
+        "blue",
+        "gray",
+        "green",
+        "yellow",
+        "purple",
+        "blue",
+        "blue"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "link": {
+      "type": "string"
+    },
+    "read": {
+      "type": "boolean"
+    },
+    "private": {
+      "type": "boolean"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "recipientEmail",
+    "title"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

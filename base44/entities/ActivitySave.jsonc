@@ -1,0 +1,29 @@
+{
+  "name": "ActivitySave",
+  "type": "object",
+  "properties": {
+    "employeeEmail": {
+      "type": "string"
+    },
+    "activityKey": {
+      "type": "string"
+    },
+    "savedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sourceRef": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employeeEmail",
+    "activityKey"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

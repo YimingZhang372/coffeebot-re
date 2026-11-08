@@ -1,0 +1,94 @@
+{
+  "name": "Certificate",
+  "type": "object",
+  "properties": {
+    "certId": {
+      "type": "string",
+      "description": "e.g. CB-FLR-2026-10-L11"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "floor",
+        "office",
+        "employee"
+      ],
+      "enumColors": [
+        "blue",
+        "purple",
+        "gray"
+      ]
+    },
+    "period": {
+      "type": "string",
+      "description": "YYYY-MM, or YYYY-Qn for employee certificates"
+    },
+    "periodLabel": {
+      "type": "string"
+    },
+    "office": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "employeeEmail": {
+      "type": "string"
+    },
+    "kgCollected": {
+      "type": "number"
+    },
+    "kgReused": {
+      "type": "number"
+    },
+    "reuseRate": {
+      "type": "number"
+    },
+    "rank": {
+      "type": "number"
+    },
+    "nextTarget": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "issued",
+        "revoked"
+      ],
+      "enumColors": [
+        "gray",
+        "green",
+        "red"
+      ]
+    },
+    "issuedBy": {
+      "type": "string"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revokedReason": {
+      "type": "string"
+    },
+    "volunteeringHours": {
+      "type": "number"
+    },
+    "activitiesDone": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "certId",
+    "type",
+    "period"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

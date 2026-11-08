@@ -1,0 +1,61 @@
+{
+  "name": "Challenge",
+  "type": "object",
+  "properties": {
+    "refId": {
+      "type": "string"
+    },
+    "fromFloor": {
+      "type": "string"
+    },
+    "toFloor": {
+      "type": "string"
+    },
+    "metric": {
+      "type": "string"
+    },
+    "startDate": {
+      "type": "string"
+    },
+    "endDate": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "completed",
+        "declined"
+      ],
+      "enumColors": [
+        "yellow",
+        "blue",
+        "green",
+        "gray"
+      ]
+    },
+    "winnerFloor": {
+      "type": "string"
+    },
+    "createdBy": {
+      "type": "string"
+    },
+    "office": {
+      "type": "string"
+    },
+    "outcomeRef": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "fromFloor",
+    "toFloor"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

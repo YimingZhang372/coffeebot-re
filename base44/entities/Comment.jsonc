@@ -1,0 +1,42 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "refId": {
+      "type": "string"
+    },
+    "reuseRefId": {
+      "type": "string"
+    },
+    "employeeEmail": {
+      "type": "string"
+    },
+    "employeeName": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "parentId": {
+      "type": "string"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "reuseRefId",
+    "body",
+    "floorCode"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

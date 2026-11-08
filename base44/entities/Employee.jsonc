@@ -1,0 +1,96 @@
+{
+  "name": "Employee",
+  "type": "object",
+  "properties": {
+    "refId": {
+      "type": "string",
+      "description": "Employee reference, e.g. EMP-MB-0034"
+    },
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string",
+      "enum": [
+        "L8",
+        "L9",
+        "L10",
+        "L11",
+        "L12",
+        "L14"
+      ],
+      "enumColors": [
+        "blue",
+        "blue",
+        "green",
+        "green",
+        "blue",
+        "purple"
+      ]
+    },
+    "department": {
+      "type": "string"
+    },
+    "office": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "employee",
+        "champion",
+        "admin"
+      ],
+      "enumColors": [
+        "gray",
+        "yellow",
+        "purple"
+      ]
+    },
+    "activeMember": {
+      "type": "boolean"
+    },
+    "joinedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "quizCompleted": {
+      "type": "boolean"
+    },
+    "quizAnswers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "savedActivities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "showNameDefault": {
+      "type": "boolean"
+    },
+    "lastNudgeAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "profileSet": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

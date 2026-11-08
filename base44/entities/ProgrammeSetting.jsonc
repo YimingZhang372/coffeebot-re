@@ -1,0 +1,106 @@
+{
+  "name": "ProgrammeSetting",
+  "type": "object",
+  "properties": {
+    "participationTarget": {
+      "type": "number"
+    },
+    "prizeName": {
+      "type": "string"
+    },
+    "prizeType": {
+      "type": "string",
+      "enum": [
+        "breakfast",
+        "donation"
+      ],
+      "enumColors": [
+        "yellow",
+        "green"
+      ]
+    },
+    "monthlyTargetKg": {
+      "type": "number"
+    },
+    "groundDropDay": {
+      "type": "number",
+      "description": "0=Sunday \u2026 6=Saturday, per Marina Bay"
+    },
+    "groundDropTime": {
+      "type": "string"
+    },
+    "clearOutDay": {
+      "type": "number"
+    },
+    "officeSchedules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "officeId": {
+            "type": "string"
+          },
+          "day": {
+            "type": "number"
+          },
+          "time": {
+            "type": "string"
+          },
+          "serviceDays": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "eligibleByFloor": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "floorCode": {
+            "type": "string"
+          },
+          "eligible": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "carbon": {
+      "type": "object",
+      "properties": {
+        "alternativeRoute": {
+          "type": "string"
+        },
+        "emissionFactor": {
+          "type": "number"
+        },
+        "emissionFactorUnit": {
+          "type": "string"
+        },
+        "emissionFactorSource": {
+          "type": "string"
+        },
+        "attributionPct": {
+          "type": "number"
+        }
+      }
+    },
+    "lastChangedBy": {
+      "type": "string"
+    },
+    "lastChangedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

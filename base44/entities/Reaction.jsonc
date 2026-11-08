@@ -1,0 +1,38 @@
+{
+  "name": "Reaction",
+  "type": "object",
+  "properties": {
+    "reuseRefId": {
+      "type": "string"
+    },
+    "employeeEmail": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "appreciate",
+        "trying",
+        "impressive"
+      ],
+      "enumColors": [
+        "blue",
+        "yellow",
+        "purple"
+      ]
+    }
+  },
+  "required": [
+    "reuseRefId",
+    "type"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

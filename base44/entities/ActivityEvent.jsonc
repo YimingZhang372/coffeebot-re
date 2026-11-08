@@ -1,0 +1,97 @@
+{
+  "name": "ActivityEvent",
+  "type": "object",
+  "properties": {
+    "refId": {
+      "type": "string",
+      "description": "Event ID, e.g. EV-2026-00412"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "collection",
+        "reuse.submitted",
+        "post.validated",
+        "post.rejected",
+        "comment",
+        "certificate.issued",
+        "certificate.revoked",
+        "settings.changed",
+        "employee.joined",
+        "reaction",
+        "challenge.created",
+        "decision.override",
+        "nudge.sent",
+        "email.sent"
+      ],
+      "enumColors": [
+        "blue",
+        "blue",
+        "green",
+        "red",
+        "gray",
+        "purple",
+        "red",
+        "yellow",
+        "gray",
+        "gray",
+        "blue",
+        "red",
+        "yellow",
+        "purple"
+      ]
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "employeeLabel": {
+      "type": "string",
+      "description": "Masked label, e.g. L10 employee #034, or opted-in name"
+    },
+    "employeeEmail": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "office": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "quantityUnit": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "entityRef": {
+      "type": "string"
+    },
+    "detail": {
+      "type": "string"
+    },
+    "photoUrl": {
+      "type": "string"
+    },
+    "auditable": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "refId",
+    "eventType",
+    "occurredAt"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

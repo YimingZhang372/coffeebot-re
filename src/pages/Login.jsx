@@ -1,144 +1,268 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { loginWithMfa } from "@/lib/authMfa";
-import { signInWithProvider } from "@/lib/authMfaFlow";
-import MfaFlow from "@/components/MfaFlow";
-import { MfaScreen } from "@/components/MfaParts";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
-import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
-import { safeReturnTo } from "@/lib/authReturnTo";
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { IMG, HARBOURLINE_MARK } from "@/lib/assets";
+import Marquee from "@/components/cb/Marquee";
+import Ticket from "@/components/cb/Ticket";
+import Pill from "@/components/cb/Pill";
+import { useSession } from "@/lib/session";
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [mfaChallenge, setMfaChallenge] = useState(null);
-  // Post-login destination (e.g. the MCP OAuth consent page sends users here
-  // with returnTo so the grant flow can resume). Same-origin paths only.
-  const returnTo = safeReturnTo();
+const PHOTO_KEYS = ["plant", "mushrooms", "compost", "scrub", "deodoriser", "grounds", "plant", "compost"];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const result = await loginWithMfa(email, password);
-      if (result.mfa_required) {
-        setMfaChallenge(result);
-        return;
-      }
-      window.location.href = returnTo;
-    } catch (err) {
-      setError(err.message || "Invalid email or password");
-    } finally {
-      setLoading(false);
+const MARQUEE = [
+  "L11 is 285 g ahead of L10",
+  "8 more colleagues for L10 to hit 30%",
+  "next ground drop tue 10 nov · 10:00",
+  "L10 vs L11 challenge live",
+];
+
+function Preloader({ onDone }) {
+  const [pct, setPct] = useState(0);
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (reduce) {
+      onDone();
+      return;
     }
-  };
-
-  const handleGoogle = async () => {
-    try { await signInWithProvider("google", returnTo); }
-    catch (err) { setError(err.message || 'Unable to sign in with Google'); }
-  };
-
-  // The second sign-in step (authenticator app or text message) replaces the whole page.
-  if (mfaChallenge) return <MfaScreen><MfaFlow challenge={mfaChallenge} returnTo={returnTo} /></MfaScreen>;
+    const start = performance.now();
+    let frame;
+    const tick = (t) => {
+      const p = Math.min(1, (t - start) / 1200);
+      setPct(Math.round(p * 100));
+      if (p < 1) frame = requestAnimationFrame(tick);
+      else setTimeout(onDone, 120);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [onDone, reduce]);
 
   return (
-    <AuthLayout
-      icon={LogIn}
-      title="Welcome back"
-      subtitle="Log in to your account"
-      footer={
-        <>
-          Don't have an account?{" "}
-          <Link
-            to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
-            className="text-primary font-medium hover:underline"
-          >
-            Create one
-          </Link>
-        </>
-      }
+    <motion.div
+      className="grain fixed inset-0 z-50 flex flex-col justify-between bg-ink px-6 py-6"
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continue with Google
-      </Button>
+      <div className="flex items-center justify-between">
+        <img src={IMG.logo} alt="CoffeeBot" className="h-6 w-auto brightness-0 invert" />
+        <span className="text-[11px] uppercase tracking-[0.2em] text-white/50">coffeebot re v2.3</span>
+      </div>
+      <div className="display tabular text-[20vw] leading-none text-white sm:text-[160px]">
+        {String(pct).padStart(2, "0")}%
+      </div>
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-white/50">
+        <span>loading programme</span>
+        <span>sgt / singapore</span>
+      </div>
+    </motion.div>
+  );
+}
 
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
-        </div>
+export default function Login() {
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
+  const { signIn } = useSession();
+  const reduce = useReducedMotion();
+
+  const enter = (workEmail, role) => {
+    signIn({ email: workEmail, role });
+    navigate("/");
+  };
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (busy) return;
+    const value = email.trim().toLowerCase();
+    if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setError("Enter your Harbourline work email address.");
+      return;
+    }
+    setError("");
+    setBusy(true);
+    enter(value, "auto");
+  };
+
+  return (
+    <div className="relative min-h-screen bg-canvas text-ink">
+      <AnimatePresence>{loading && <Preloader onDone={() => setLoading(false)} />}</AnimatePresence>
+
+      <div className="bg-ink px-5 py-2 text-center text-[11px] uppercase tracking-[0.14em] text-white/55">
+        Pilot programme · quantities are weighed at collection and employee-reported at reuse
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
+      <motion.div
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: loading ? 0 : 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <header className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-10">
+          <div className="flex items-center gap-4">
+            <img src={IMG.logo} alt="CoffeeBot" className="h-12 w-auto" />
+            <span className="hidden h-9 w-px bg-rule sm:block" />
+            <div className="hidden items-center gap-2.5 sm:flex">
+              <span className="flex h-8 items-center border border-rule px-2 text-[10px] font-semibold tracking-[0.16em] text-ink">
+                {HARBOURLINE_MARK}
+              </span>
+              <span className="text-[12px] text-sub">Deployed at Harbourline Bank</span>
+            </div>
           </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-              Forgot password?
+          <nav className="flex items-center gap-5 text-[14px] text-sub">
+            <Link to="/about" className="transition-colors hover:text-ink">
+              about the programme
             </Link>
+            <Link to="/demo" className="transition-colors hover:text-ink">
+              demo accounts
+            </Link>
+          </nav>
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr]">
+          <div className="px-5 pb-14 pt-6 sm:px-10 lg:pb-20">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-sub">
+              harbourline bank · sustainability programme
+            </div>
+            <h1 className="display mt-5 text-[54px] sm:text-[88px] xl:text-[104px]">
+              grounds
+              <br />
+              into
+              <br />
+              evidence.
+            </h1>
+            <p className="mt-6 max-w-[46ch] text-[15px] leading-relaxed text-sub">
+              CoffeeBot Re collects the spent grounds from the tabletop machines on each
+              Harbourline floor, weighs them at the collection table, and turns the reuse your
+              colleagues report into a validated, report-ready ESG figure.
+            </p>
+
+            <div className="mt-9 max-w-[520px]">
+              <motion.div
+                initial={reduce ? false : { opacity: 0, y: 18, rotate: 0 }}
+                animate={loading ? {} : { opacity: 1, y: 0, rotate: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
+              >
+                <Ticket id="CB-ACC-2026-MB" rotate={-2.4}>
+                  <h2 className="text-[17px] font-medium">Sign in to the programme</h2>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-sub">
+                    Marina Bay · 6 floors · 150 employees
+                  </p>
+
+                  <Pill
+                    className="mt-6 w-full"
+                    size="lg"
+                    onClick={() => enter("demo.employee@harbourline-demo.com", "employee")}
+                    type="button"
+                  >
+                    sign in with harbourline sso
+                  </Pill>
+
+                  <div className="my-6 flex items-center gap-3">
+                    <span className="h-px flex-1 bg-rule" />
+                    <span className="text-[11px] uppercase tracking-[0.16em] text-sub">
+                      or use your work email
+                    </span>
+                    <span className="h-px flex-1 bg-rule" />
+                  </div>
+
+                  <form onSubmit={submit} className="space-y-3">
+                    <label className="block text-[11px] uppercase tracking-[0.16em] text-sub">
+                      work email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setError("");
+                      }}
+                      placeholder="name@harbourline.com"
+                      className="h-12 w-full rounded-full border border-rule bg-white px-5 text-[15px] outline-none transition-colors placeholder:text-[#A8A29C] focus:border-ink"
+                    />
+                    {error && <p className="px-1 text-[12px] text-[hsl(var(--destructive))]">{error}</p>}
+                    <Pill type="submit" variant="outline" className="w-full" size="lg" disabled={busy}>
+                      {busy ? "checking your floor…" : "continue with work email"}
+                    </Pill>
+                  </form>
+
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-dashed border-rule pt-4 text-[12px]">
+                    <Link to="/admin/login" className="text-sub underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
+                      programme administrator? sign in here
+                    </Link>
+                    <span className="text-sub">last updated 07 nov 2026, 09:14 sgt</span>
+                  </div>
+                </Ticket>
+              </motion.div>
+            </div>
           </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
+
+          <div className="relative min-h-[320px] overflow-hidden lg:min-h-[640px]">
+            <img
+              src={IMG.table}
+              alt="A collection table with a lidded caddy of spent grounds and a kitchen scale"
+              className="h-full w-full object-cover"
             />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/60 to-transparent p-6">
+              <div className="text-[11px] uppercase leading-relaxed tracking-[0.16em] text-white/80">
+                collection table
+                <br />
+                marina bay · level 10
+              </div>
+              <div className="text-right text-[11px] uppercase tracking-[0.16em] text-white/80">
+                420 g available
+                <br />
+                next drop tue 10 nov
+              </div>
+            </div>
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Logging in...
-            </>
-          ) : (
-            "Log in"
-          )}
-        </Button>
-      </form>
-    </AuthLayout>
+
+        <Marquee items={MARQUEE} />
+
+        <section className="px-5 py-14 sm:px-10">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2 className="display text-[28px] sm:text-[38px]">made by harbourline</h2>
+            <p className="text-[13px] text-sub">
+              validated reuses this year · 312 &nbsp;·&nbsp; names withheld
+            </p>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-[6px] sm:grid-cols-4">
+            {PHOTO_KEYS.map((key, i) => (
+              <motion.figure
+                key={`${key}-${i}`}
+                initial={reduce ? false : { opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.4, ease: "easeOut", delay: (i % 4) * 0.05 }}
+                className="group relative aspect-[4/3] overflow-hidden rounded-[2px] bg-[#D6D2CD]"
+              >
+                <img
+                  src={IMG[key]}
+                  alt="A validated coffee ground reuse"
+                  className="h-full w-full object-cover grayscale opacity-35 transition-all duration-[400ms] ease-out group-hover:grayscale-0 group-hover:opacity-100"
+                />
+                <figcaption className="absolute bottom-2 left-2 text-[10px] uppercase tracking-[0.14em] text-white/0 transition-colors duration-300 group-hover:text-white">
+                  {i % 3 === 0 ? "L11 · plant fertiliser" : i % 3 === 1 ? "L9 · oyster mushrooms" : "L12 · compost booster"}
+                </figcaption>
+              </motion.figure>
+            ))}
+            <div className="hidden rounded-[2px] border border-rule sm:block" />
+          </div>
+        </section>
+
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-rule px-5 py-6 text-[12px] text-sub sm:px-10">
+          <div className="flex items-center gap-3">
+            <img src={IMG.logo} alt="CoffeeBot" className="h-5 w-auto opacity-70" />
+            <span>CoffeeBot Re v2.3</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-5">
+            <Link to="/about" className="hover:text-ink">Privacy</Link>
+            <Link to="/about" className="hover:text-ink">Data retention policy</Link>
+            <Link to="/about" className="hover:text-ink">Support</Link>
+          </div>
+        </footer>
+      </motion.div>
+    </div>
   );
 }

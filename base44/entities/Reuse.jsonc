@@ -1,0 +1,139 @@
+{
+  "name": "Reuse",
+  "type": "object",
+  "properties": {
+    "refId": {
+      "type": "string",
+      "description": "Reuse record reference, e.g. RR-2026-00412"
+    },
+    "employeeEmail": {
+      "type": "string"
+    },
+    "employeeName": {
+      "type": "string"
+    },
+    "employeeRef": {
+      "type": "string"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "office": {
+      "type": "string"
+    },
+    "activityKey": {
+      "type": "string"
+    },
+    "grams": {
+      "type": "number"
+    },
+    "note": {
+      "type": "string"
+    },
+    "photoUrl": {
+      "type": "string"
+    },
+    "showName": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "validated",
+        "rejected"
+      ],
+      "enumColors": [
+        "yellow",
+        "green",
+        "red"
+      ]
+    },
+    "rejectionReason": {
+      "type": "string"
+    },
+    "validatedBy": {
+      "type": "string"
+    },
+    "validatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidenceLevel": {
+      "type": "string",
+      "enum": [
+        "Reported",
+        "Validated"
+      ],
+      "enumColors": [
+        "yellow",
+        "green"
+      ]
+    },
+    "inspiredByRef": {
+      "type": "string"
+    },
+    "progressUpdates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reactions": {
+      "type": "object",
+      "properties": {
+        "appreciate": {
+          "type": "number"
+        },
+        "trying": {
+          "type": "number"
+        },
+        "impressive": {
+          "type": "number"
+        }
+      }
+    },
+    "reactedFloors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "commentCount": {
+      "type": "number"
+    },
+    "reported": {
+      "type": "boolean"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "collectionRef": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "refId",
+    "grams",
+    "floorCode",
+    "activityKey"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}
