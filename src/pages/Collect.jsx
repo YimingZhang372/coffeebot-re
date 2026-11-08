@@ -16,7 +16,7 @@ const statusOf = (stock) => (stock > 320 ? "available" : stock > 120 ? "low" : "
 const labelOf = (stock) => `${stock} g available`;
 
 export default function Collect() {
-  const { me, collections, settings, myRow, recordCollection, reuses } = useProgramme();
+  const { me, collections, settings, myRow, recordCollection } = useProgramme();
   const st = groundDropState(settings);
   const [selected, setSelected] = useState(me?.floorCode || "L10");
   const [flow, setFlow] = useState(null); // {step, grams, photo}
@@ -73,7 +73,6 @@ export default function Collect() {
     setSaving(true);
     const beforeRank = myRow?.rank;
     const created = await recordCollection({ grams: Number(flow.grams), proofPhotoUrl: flow.photo });
-    const { reuses: _r } = { reuses };
     setSaving(false);
     setResult({ created, beforeRank, grams: Number(flow.grams), evidence: flow.photo ? "Weighed" : "Reported" });
     setFlow(null);

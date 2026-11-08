@@ -18,7 +18,10 @@ import { marqueeItems } from "@/lib/metrics";
 const TABS = ["Feed", "Gallery", "Challenges"];
 
 export default function Community() {
-  const { me, reuses, rows, myRow, month, challenges } = useProgramme();
+  const { me, reuses, rows, myRow, month, challenges, nudgeFloor } = useProgramme();
+  const [nudge, setNudge] = useState("");
+  const nudgeBlocked =
+    me?.lastNudgeAt && Date.now() - new Date(me.lastNudgeAt).getTime() < 7 * 86400000;
   const [tab, setTab] = useState("Feed");
   const [scope, setScope] = useState("floor");
   const [activity, setActivity] = useState("");
@@ -146,6 +149,28 @@ export default function Community() {
                   <span className="text-[12px] text-sub">No validated reuse on your floor this week.</span>
                 )}
               </div>
+              {me?.role === "champion" && (
+                <div className="mt-4 border-t border-rule pt-3">
+                  <button
+                    type="button"
+                    disabled={nudgeBlocked}
+                    onClick={async () => {
+                      const res = await nudgeFloor();
+                      setNudge(
+                        res.blocked
+                          ? "A reminder was already sent this week."
+                          : `Reminder sent to ${res.sent} colleagues who have not participated this month.`
+                      );
+                    }}
+                    className="w-full rounded-full border-[1.5px] border-ink px-3 py-2 text-[12px] lowercase transition-colors hover:border-caramel hover:text-caramel disabled:opacity-40"
+                  >
+                    nudge my floor
+                  </button>
+                  <p className="mt-1.5 text-[10px] uppercase leading-relaxed tracking-[0.1em] text-sub">
+                    {nudge || (nudgeBlocked ? "sent this week · next available in 7 days" : "once a week · simulated email and notification")}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
