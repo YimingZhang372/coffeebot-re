@@ -57,9 +57,11 @@ export default function PostCard({ reuse, onOpen }) {
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DFDBD6] text-[10px] uppercase tracking-[0.06em] text-ink">
-              {authorLabel(reuse).split(" ").slice(0, 2).map((p) => p[0]).join("")}
-            </span>
+            {reuse.showName && (
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DFDBD6] text-[10px] uppercase tracking-[0.06em] text-ink">
+                {authorLabel(reuse).split(" ").slice(0, 2).map((p) => p[0]).join("")}
+              </span>
+            )}
             <div>
               <p className="text-[13px] text-ink">{authorLabel(reuse)}</p>
               <p className="text-[11px] uppercase tracking-[0.12em] text-sub">

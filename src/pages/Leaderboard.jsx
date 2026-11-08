@@ -9,16 +9,12 @@ import Marquee from "@/components/cb/Marquee";
 import { marqueeItems, publicNudges } from "@/lib/metrics";
 import NudgeList from "@/components/cb/NudgeList";
 
-const OFFICES = [
-  { id: "marina-bay", name: "Marina Bay", floors: 6, eligible: 150, reusedG: 4040, collectedG: 6085, participants: 61 },
-  { id: "changi", name: "Changi Business Park", floors: 4, eligible: 96, reusedG: 2310, collectedG: 3520, participants: 34 },
-  { id: "raffles", name: "Raffles Place", floors: 3, eligible: 74, reusedG: 1620, collectedG: 2480, participants: 23 },
+const OTHER_OFFICES = [
+  { id: "changi", name: "Changi Business Park", floors: 4, eligible: 96, monthG: 1420, allG: 8200, monthP: 21, allP: 34 },
+  { id: "raffles", name: "Raffles Place", floors: 3, eligible: 74, monthG: 980, allG: 5400, monthP: 14, allP: 23 },
 ];
 
-const BANKS = [
-  { name: "Harbourline Bank", offices: 3, eligible: 320, reusedKg: 7.97, participation: 36.9 },
-  { name: "Straits Meridian Bank", offices: 2, eligible: 240, reusedKg: 5.12, participation: 28.4 },
-];
+const OTHER_BANK = { name: "Straits Meridian Bank", offices: 2, eligible: 240, monthKg: 3.94, allKg: 21.6, monthP: 12.8, allP: 22.1 };
 
 export default function Leaderboard() {
   const { rows, allRows, myRow, me, month, settings, prevRows, challenges } = useProgramme();
@@ -30,12 +26,34 @@ export default function Leaderboard() {
   const activeChallenge = challenges.find((c) => c.status === "active");
   const marquee = marqueeItems({ rows, myRow, nextDropLabel: `${st.nextLabel} · ${st.time}`, challenge: activeChallenge });
 
-  const marina = list.reduce((s, r) => s + r.reused, 0);
-  const officeRows = OFFICES.map((o) =>
-    o.id === "marina-bay"
-      ? { ...o, reusedG: marina, collectedG: list.reduce((s, r) => s + r.collected, 0), participants: list.reduce((s, r) => s + r.participants, 0) }
-      : o
-  ).sort((a, b) => b.reusedG / b.eligible - a.reusedG / a.eligible);
+  const marinaReused = list.reduce((s, r) => s + r.reused, 0);
+  const marinaParticipants = list.reduce((s, r) => s + r.participants, 0);
+
+  const officeRows = [
+    { id: "marina-bay", name: "Marina Bay", floors: 6, eligible: 150, reusedG: marinaReused, participants: marinaParticipants },
+    ...OTHER_OFFICES.map((o) => ({
+      ...o,
+      reusedG: period === "month" ? o.monthG : o.allG,
+      participants: period === "month" ? o.monthP : o.allP,
+    })),
+  ].sort((a, b) => b.reusedG / b.eligible - a.reusedG / a.eligible);
+
+  const banks = [
+    {
+      name: "Harbourline Bank",
+      offices: 3,
+      eligible: 320,
+      reusedKg: officeRows.reduce((s, o) => s + o.reusedG, 0) / 1000,
+      participation: (officeRows.reduce((s, o) => s + o.participants, 0) / 320) * 100,
+    },
+    {
+      name: OTHER_BANK.name,
+      offices: OTHER_BANK.offices,
+      eligible: OTHER_BANK.eligible,
+      reusedKg: period === "month" ? OTHER_BANK.monthKg : OTHER_BANK.allKg,
+      participation: period === "month" ? OTHER_BANK.monthP : OTHER_BANK.allP,
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -151,7 +169,7 @@ export default function Leaderboard() {
       {tab === "banks" && (
         <div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {BANKS.map((b, i) => (
+            {banks.map((b, i) => (
               <div key={b.name} className="bg-paper p-5">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[11px] tabular text-sub">{String(i + 1).padStart(2, "0")}</span>
