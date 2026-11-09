@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { useProgramme } from "@/lib/programmeData";
-import { monthLabel, formatSgt } from "@/lib/programme";
+import { monthLabel, formatSgt, nowSgt } from "@/lib/programme";
 import { publicNudges, marqueeItems } from "@/lib/metrics";
-import { groundDropState } from "@/lib/groundDrop";
-import { downloadIcs } from "@/lib/groundDrop";
+import { groundDropState, downloadIcs } from "@/lib/groundDrop";
+import { shiftMonth } from "@/lib/pledge";
 import CountUp from "@/components/cb/CountUp";
 import Marquee from "@/components/cb/Marquee";
 import Stepper from "@/components/cb/Stepper";
@@ -15,18 +15,33 @@ import Pill from "@/components/cb/Pill";
 import StatusChip from "@/components/cb/StatusChip";
 import ImpactLine from "@/components/cb/ImpactLine";
 
+const DROPS_PER_MONTH = 4;
+
 export default function Home() {
   const {
-    me, rows, office, prevOffice, myRow, settings, month,
+    me, rows, office, myRow, settings, month, reuses, dropsDone,
     myCollections, myReuses, notifications, board, config,
   } = useProgramme();
   const reduce = useReducedMotion();
 
   const divertedKg = office.reused / 1000;
   const targetKg = settings?.monthlyTargetKg ?? 6;
-  const delta = prevOffice.reused ? ((office.reused - prevOffice.reused) / prevOffice.reused) * 100 : 0;
+  const projectedKg = dropsDone > 0 ? (divertedKg * DROPS_PER_MONTH) / dropsDone : divertedKg;
   const monthName = monthLabel(month);
   const st = groundDropState(settings);
+
+  // Same point last month: the first N days, N = today's day of month, so 9 days are compared with 9 days.
+  const dayCut = nowSgt().getUTCDate();
+  const prevKey = shiftMonth(month, -1);
+  const prevSamePoint = reuses
+    .filter(
+      (r) =>
+        r.status === "validated" &&
+        String(r.occurredAt).slice(0, 7) === prevKey &&
+        Number(String(r.occurredAt).slice(8, 10)) <= dayCut
+    )
+    .reduce((s, r) => s + (r.grams || 0), 0);
+  const samePointDelta = prevSamePoint ? ((office.reused - prevSamePoint) / prevSamePoint) * 100 : 0;
 
   const monthCollections = myCollections.filter((c) => String(c.occurredAt).slice(0, 7) === month);
   const monthReuses = myReuses.filter((r) => String(r.occurredAt).slice(0, 7) === month);
@@ -65,9 +80,6 @@ export default function Home() {
     };
   })();
 
-  const list = rows.slice(0, 3);
-  if (myRow && !list.find((r) => r.code === myRow.code)) list.push(myRow);
-
   const nudges = publicNudges({ rows, myRow, monthLabel: monthName, daysLeft: 22 });
   const privateNudges = notifications
     .filter((n) => n.type === "nudge" || n.type === "validation")
@@ -77,7 +89,7 @@ export default function Home() {
   const myPledge = board.find((r) => r.code === me?.floorCode);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-sub">
@@ -107,34 +119,41 @@ export default function Home() {
             <span className="text-[24px] lowercase tracking-normal sm:text-[32px]">kg</span>
           </div>
           <p className="mt-1 text-[13px] text-sub">
-            {monthName} to date · {office.participants} of {office.eligible} employees participating ·{" "}
-            {office.reuseRate.toFixed(0)}% reuse rate
+            {monthName} to date · {office.participants} of {office.eligible} employees participating
+          </p>
+          <p className="mt-1 text-[13px] text-sub">
+            reuse rate{" "}
+            <span className="tabular text-ink">{office.reuseRate.toFixed(0)}%</span> · {divertedKg.toFixed(2)} kg
+            reused of <span className="tabular text-ink">{(office.collected / 1000).toFixed(2)} kg</span> collected
           </p>
           <ImpactLine grams={office.reused} scope="office" className="mt-1.5" />
         </div>
         <div className="space-y-4">
           <div>
             <div className="flex items-baseline justify-between text-[12px] text-sub">
-              <span>office target</span>
+              <span>office target · projection at this pace</span>
               <span className="tabular text-ink">
-                {divertedKg.toFixed(2)} / {targetKg.toFixed(2)} kg
+                {projectedKg.toFixed(1)} / {targetKg.toFixed(1)} kg
               </span>
             </div>
             <div className="mt-2 h-[3px] w-full bg-rule">
               <motion.div
-                className="h-[3px] bg-verdant"
+                className={`h-[3px] ${projectedKg >= targetKg ? "bg-verdant" : "bg-caramel"}`}
                 initial={reduce ? false : { width: 0 }}
-                animate={{ width: `${Math.min(100, (divertedKg / targetKg) * 100)}%` }}
+                animate={{ width: `${Math.min(100, (projectedKg / targetKg) * 100)}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               />
             </div>
+            <p className="mt-1.5 text-[11px] text-sub">
+              {divertedKg.toFixed(2)} kg so far · {dropsDone} of {DROPS_PER_MONTH} Ground Drops held
+            </p>
           </div>
           <div className="flex items-center gap-6 text-[12px] text-sub">
             <span>
-              change vs last month{" "}
-              <span className={`tabular ${delta >= 0 ? "text-verdant" : "text-[#A44A3F]"}`}>
-                {delta >= 0 ? "+" : ""}
-                {delta.toFixed(0)}%
+              vs same point in {monthLabel(prevKey)}{" "}
+              <span className={`tabular ${samePointDelta >= 0 ? "text-verdant" : "text-[#A44A3F]"}`}>
+                {samePointDelta >= 0 ? "+" : ""}
+                {samePointDelta.toFixed(0)}%
               </span>
             </span>
             <span>
@@ -148,6 +167,8 @@ export default function Home() {
         </div>
       </motion.div>
 
+      <Stepper current={step} />
+
       <Marquee items={marquee} speed={52} className="-mx-5 sm:-mx-8" />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.25fr_1fr]">
@@ -158,8 +179,27 @@ export default function Home() {
             </h2>
             <span className="text-[11px] uppercase tracking-[0.14em] text-sub">kg reused per employee</span>
           </div>
-          <RankingIndex rows={list} myFloor={me?.floorCode} />
+          <RankingIndex rows={rows} myFloor={me?.floorCode} />
           <RankingFooter />
+
+          {myPledge && (
+            <Link
+              to="/pledge"
+              className="mt-5 block bg-ink p-5 text-white transition-colors duration-200 hover:bg-caramel"
+            >
+              <div className="flex items-baseline justify-between">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-white/55">
+                  your floor&rsquo;s pledge · {myPledge.code}
+                </p>
+                <span className="text-[12px] lowercase text-white/60">open →</span>
+              </div>
+              <p className="display mt-2 text-[30px] leading-none">+{myPledge.bid}%</p>
+              <p className="mt-2 text-[12.5px] text-white/75">
+                {myPledge.paceMet ? "On track" : "Behind"} · projected {Math.round(myPledge.score)} · rank{" "}
+                {myPledge.rank} of 6
+              </p>
+            </Link>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -179,23 +219,6 @@ export default function Home() {
               <Pill to="/activities" variant="outline" size="sm">activities</Pill>
             </div>
           </div>
-
-          {myPledge && (
-            <Link
-              to="/pledge"
-              className="block bg-ink p-5 text-white transition-colors duration-200 hover:bg-caramel"
-            >
-              <div className="flex items-baseline justify-between">
-                <p className="text-[11px] uppercase tracking-[0.14em] text-white/55">your floor&rsquo;s pledge</p>
-                <span className="text-[12px] lowercase text-white/60">open →</span>
-              </div>
-              <p className="display mt-2 text-[30px] leading-none">+{myPledge.bid}%</p>
-              <p className="mt-2 text-[12.5px] text-white/75">
-                {myPledge.paceMet ? "On track" : "Behind"} · projected {Math.round(myPledge.score)} · rank{" "}
-                {myPledge.rank} of 6
-              </p>
-            </Link>
-          )}
 
           <div className="border-t border-rule pt-5">
             <div className="flex items-baseline justify-between">
@@ -238,19 +261,7 @@ export default function Home() {
       <div>
         <div className="flex items-baseline justify-between border-b border-rule pb-3">
           <h2 className="text-[15px] lowercase">
-            <span className="mr-2 text-sub tabular">05</span>the four steps
-          </h2>
-          <span className="text-[11px] uppercase tracking-[0.14em] text-sub">you are at {step}</span>
-        </div>
-        <div className="pt-4">
-          <Stepper current={step} />
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-baseline justify-between border-b border-rule pb-3">
-          <h2 className="text-[15px] lowercase">
-            <span className="mr-2 text-sub tabular">06</span>what the data says
+            <span className="mr-2 text-sub tabular">05</span>what the data says
           </h2>
           <span className="text-[11px] uppercase tracking-[0.14em] text-sub">floor level in public</span>
         </div>

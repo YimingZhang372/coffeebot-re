@@ -24,7 +24,7 @@ const LABELS = {
 
 export default function AppShell() {
   const { session } = useSession();
-  const { loading, me } = useProgramme();
+  const { loading, me, viewAs, exitViewAs } = useProgramme();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -46,6 +46,22 @@ export default function AppShell() {
       <div className="border-b border-rule bg-canvas px-5 py-1.5 text-center text-[11px] uppercase tracking-[0.12em] text-sub sm:px-8">
         Pilot programme · quantities are weighed at collection and employee-reported at reuse
       </div>
+
+      {viewAs && (
+        <div className="flex flex-wrap items-center justify-center gap-3 bg-ink px-5 py-1.5 text-[11px] lowercase text-[#d8d4cf]">
+          <span>viewing the programme as {viewAs} · administrator preview</span>
+          <button
+            type="button"
+            onClick={async () => {
+              await exitViewAs();
+              window.location.href = "/admin";
+            }}
+            className="rounded-full border border-white/30 px-2.5 py-0.5 hover:border-white hover:text-white"
+          >
+            back to the console
+          </button>
+        </div>
+      )}
 
       <header className="sticky top-0 z-30 border-b border-rule bg-canvas/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1280px] items-center gap-3 px-5 py-3 sm:px-8">

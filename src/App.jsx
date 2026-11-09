@@ -26,6 +26,7 @@ import AppShell from '@/components/cb/AppShell';
 import AdminShell from '@/components/admin/AdminShell';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import AdminActivity from '@/pages/admin/AdminActivity';
+import AdminValidation from '@/pages/admin/AdminValidation';
 import AdminFloors from '@/pages/admin/AdminFloors';
 import AdminPledges from '@/pages/admin/AdminPledges';
 import AdminCalculations from '@/pages/admin/AdminCalculations';
@@ -59,6 +60,7 @@ const AppRoutes = () => (
     <Route path="/admin" element={<AdminShell />}>
       <Route index element={<AdminOverview />} />
       <Route path="activity" element={<AdminActivity />} />
+      <Route path="validation" element={<AdminValidation />} />
       <Route path="floors" element={<AdminFloors />} />
       <Route path="pledges" element={<AdminPledges />} />
       <Route path="calculations" element={<AdminCalculations />} />

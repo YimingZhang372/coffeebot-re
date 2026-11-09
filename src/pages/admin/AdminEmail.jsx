@@ -1,25 +1,41 @@
 import { useMemo, useState } from "react";
 import { useProgramme } from "@/lib/programmeData";
-import { monthLabel, timeAgo } from "@/lib/programme";
+import { monthLabel, activityByKey } from "@/lib/programme";
 import { clockLabel, shortDate } from "@/lib/pledge";
 import { IMG } from "@/lib/assets";
 import Pill from "@/components/cb/Pill";
 import StatusChip from "@/components/cb/StatusChip";
 
 export default function AdminEmail() {
-  const { reuses, settings, month, logEvent, me, board, config } = useProgramme();
+  const { reuses, settings, month, logEvent, me, board, config, rowsFor } = useProgramme();
   const [sent, setSent] = useState(false);
-  const winner = board[0];
+
+  const leader = board[0];
+  const decided = Date.now() >= new Date(config.monthCloseAt).getTime();
 
   const bestPost = useMemo(() => {
     const validated = reuses.filter(
-      (r) => r.status === "validated" && !r.showName && r.occurredAt.slice(0, 7) === month
+      (r) => r.status === "validated" && !r.showName && r.occurredAt.slice(0, 7) === month && r.grams > 0
     );
-    return validated.sort((a, b) => {
-      const s = (x) => Object.values(x.reactions || {}).reduce((t, n) => t + n, 0);
-      return s(b) - s(a);
-    })[0];
+    return validated.sort((a, b) => b.grams - a.grams)[0];
   }, [reuses, month]);
+
+  const past = useMemo(
+    () =>
+      ["2026-09", "2026-10"].map((key) => {
+        const list = rowsFor(key);
+        const top = list.slice().sort((a, b) => b.reused - a.reused)[0];
+        return {
+          key,
+          label: monthLabel(key),
+          launch: key === "2026-09",
+          top,
+          kgReused: list.reduce((s, r) => s + r.reused, 0) / 1000,
+          kgCollected: list.reduce((s, r) => s + r.collected, 0) / 1000,
+        };
+      }),
+    [rowsFor]
+  );
 
   const send = async () => {
     await logEvent({
@@ -46,7 +62,7 @@ export default function AdminEmail() {
             not from CoffeeBot.
           </p>
         </div>
-        <StatusChip status={sent ? "validated" : "pending"}>{sent ? "sent" : "draft"}</StatusChip>
+        <StatusChip status={sent ? "validated" : "pending"}>{sent ? "sent" : decided ? "draft" : "preview"}</StatusChip>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.4fr_1fr]">
@@ -58,14 +74,19 @@ export default function AdminEmail() {
               from Group Sustainability, Harbourline Bank · {monthLabel(month)}
             </p>
             <h2 className="mt-2 text-[20px] font-semibold leading-snug">
-              {winner?.code} wins the {monthLabel(month)} Pledge Auction on {Math.round(winner?.score || 0)} points
+              {decided
+                ? `${leader?.code} wins the ${monthLabel(month)} Pledge Auction on ${Math.round(leader?.score || 0)} points`
+                : `${leader?.code} leads the ${monthLabel(month)} Pledge Auction on ${Math.round(leader?.score || 0)} projected points`}
             </h2>
             <p className="mt-3 text-[13px] leading-relaxed text-ink">
-              Six floors bid the uplift they would reach, and delivered {Math.round(board.reduce((s, r) => s + r.projected, 0) / 6)} g
-              per employee against a {Math.round(board.reduce((s, r) => s + r.baselinePer, 0) / 6)} g baseline. Half volume,
-              half uplift: {winner?.code} took it with a {winner?.bid}% bid
-              {winner ? ` and ${winner.paceMet ? "an on-pace month" : "a late surge"}` : ""}.
+              Six floors bid on their own uplift. Half the score is volume, half the uplift.
             </p>
+            {!decided && (
+              <p className="mt-2 text-[12px] leading-relaxed text-sub">
+                Preview: the winner is announced after {shortDate(config.monthCloseAt)},{" "}
+                {clockLabel(config.monthCloseAt)} SGT. Figures move until the month closes.
+              </p>
+            )}
 
             <table className="mt-4 w-full border-collapse text-[12px]">
               <thead>
@@ -96,13 +117,23 @@ export default function AdminEmail() {
             <div className="mt-4 border-t border-rule pt-3 text-[13px] leading-relaxed">
               <p>
                 <span className="font-medium">Floor of the month: </span>
-                {winner?.code} · {winner?.name}. The prize is a team breakfast at Marina Bay funded by Harbourline, or a
-                donation to a charity chosen by the floor.
+                {decided ? (
+                  <>
+                    {leader?.code} · {leader?.name}. The prize is a team breakfast at Marina Bay funded by Harbourline,
+                    or a donation to a charity chosen by the floor.
+                  </>
+                ) : (
+                  <>
+                    announced after {shortDate(config.monthCloseAt)} at {clockLabel(config.monthCloseAt)}. The prize is a
+                    team breakfast at Marina Bay funded by Harbourline, or a donation to a charity chosen by the floor.
+                  </>
+                )}
               </p>
               {bestPost && (
                 <p className="mt-2">
                   <span className="font-medium">Best anonymous post: </span>
-                  {bestPost.floorCode} colleague, {bestPost.grams} g reused ({timeAgo(bestPost.occurredAt)}).
+                  {bestPost.floorCode} colleague, {bestPost.grams} g reused,{" "}
+                  {activityByKey(bestPost.activityKey).name.toLowerCase()}.
                 </p>
               )}
               <p className="mt-2 text-sub">
@@ -120,6 +151,34 @@ export default function AdminEmail() {
 
         <div className="space-y-4">
           <div className="border border-rule bg-paper p-4">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-sub">past months</p>
+            <ul className="mt-2 divide-y divide-rule text-[12px]">
+              {past.map((m) => (
+                <li key={m.key} className="py-2.5">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-ink">{m.label}</span>
+                    <span className="text-[11px] uppercase tracking-[0.1em] text-sub">
+                      {m.launch ? "launch" : "auction"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sub">
+                    Floor of the month{" "}
+                    <span className="text-ink">
+                      {m.launch ? "not contested" : `${m.top?.code} · ${m.top?.name}`}
+                    </span>
+                  </p>
+                  <p className="mt-0.5 tabular text-sub">
+                    {(m.kgReused).toFixed(2)} kg reused of {(m.kgCollected).toFixed(2)} kg collected
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-[11px] leading-relaxed text-sub">
+              October&rsquo;s emails went out on the last working day; the results above are the issued figures.
+            </p>
+          </div>
+
+          <div className="border border-rule bg-paper p-4">
             <p className="text-[11px] uppercase tracking-[0.12em] text-sub">recipients</p>
             <p className="mt-1 text-[13px] text-ink">All Marina Bay staff · 150 employees</p>
             <p className="mt-1 text-[12px] text-sub">
@@ -133,7 +192,7 @@ export default function AdminEmail() {
             <ul className="mt-2 space-y-1.5 text-[12px]">
               <li className="flex justify-between"><span className="text-sub">bid and result per floor</span><span className="text-verdant">included</span></li>
               <li className="flex justify-between"><span className="text-sub">volume and uplift points</span><span className="text-verdant">included</span></li>
-              <li className="flex justify-between"><span className="text-sub">winner and prize</span><span className="text-verdant">included</span></li>
+              <li className="flex justify-between"><span className="text-sub">winner or projection, dated</span><span className="text-verdant">included</span></li>
               <li className="flex justify-between"><span className="text-sub">next pledge night</span><span className="text-verdant">included</span></li>
               <li className="flex justify-between"><span className="text-sub">no individual names</span><span className="text-verdant">checked</span></li>
             </ul>

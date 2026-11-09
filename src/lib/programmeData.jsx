@@ -7,6 +7,23 @@ import { auctionBoard, bidFor, clockLabel, dropsDoneIn, pledgeConfig } from "@/l
 
 const Ctx = createContext(null);
 
+const VIEW_KEY = "cb-view-as";
+const readViewAs = () => {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) || "";
+  } catch {
+    return "";
+  }
+};
+const writeViewAs = (email) => {
+  try {
+    if (email) window.localStorage.setItem(VIEW_KEY, email);
+    else window.localStorage.removeItem(VIEW_KEY);
+  } catch {
+    /* ignore storage failures */
+  }
+};
+
 const all = async (entity, opts = {}) => {
   const res = await entity.list({ limit: 500, ...opts });
   return Array.isArray(res) ? res : res?.items || [];
@@ -33,6 +50,7 @@ export function ProgrammeProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [settings, setSettings] = useState(null);
   const [me, setMe] = useState(null);
+  const [viewAs, setViewAs] = useState("");
 
   const load = useCallback(async () => {
     const [emp, col, reu, com, ple, cer, sav, set] = await Promise.all([
@@ -63,6 +81,19 @@ export function ProgrammeProvider({ children }) {
         return null;
       }
       const found = list.find((e) => e.email?.toLowerCase() === session.email.toLowerCase());
+      const param =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("viewAs")
+          : "";
+      if (param) writeViewAs(param);
+      const target = param || readViewAs();
+      const other = target ? list.find((e) => e.email?.toLowerCase() === target.toLowerCase()) : null;
+      if (other && found?.role === "admin") {
+        setViewAs(other.email);
+        setMe(other);
+        return other;
+      }
+      setViewAs("");
       if (found) {
         setMe(found);
         return found;
@@ -325,6 +356,36 @@ export function ProgrammeProvider({ children }) {
     [me, logEvent, maskLabel, refresh]
   );
 
+  const reviewCollection = useCallback(
+    async (collection, decision, reason = "") => {
+      const actor = me?.name || "Programme administrator";
+      await base44.entities.Collection.update(collection.id, {
+        evidenceLevel: decision === "validated" ? "Weighed" : "Reported",
+        needsReview: false,
+        tableStatus: decision === "validated" ? "available" : "rejected",
+      });
+      await logEvent({
+        eventType: decision === "validated" ? "post.validated" : "post.rejected",
+        employeeLabel: maskLabel(collection.employeeEmail, false, collection.floorCode),
+        employeeEmail: collection.employeeEmail,
+        floorCode: collection.floorCode,
+        quantity: collection.grams,
+        quantityUnit: "g collected",
+        status: decision === "validated" ? "Validated" : "Rejected",
+        actor,
+        entityRef: collection.refId,
+        detail:
+          decision === "validated"
+            ? "Collection without a proof photo confirmed by the Sustainability team."
+            : reason,
+        photoUrl: collection.proofPhotoUrl || "",
+        auditable: true,
+      });
+      await refresh();
+    },
+    [me, logEvent, maskLabel, refresh]
+  );
+
   const addComment = useCallback(
     async (reuse, body, parentId = "") => {
       const created = await base44.entities.Comment.create({
@@ -468,6 +529,12 @@ export function ProgrammeProvider({ children }) {
     await Promise.all(unreadOnes.map((n) => base44.entities.Notification.update(n.id, { read: true })));
     await loadNotifications();
   }, [myNotifications, loadNotifications]);
+
+  const exitViewAs = useCallback(async () => {
+    writeViewAs("");
+    setViewAs("");
+    await refresh();
+  }, [refresh]);
 
   const saveSettings = useCallback(
     async (patch, detail) => {
@@ -691,6 +758,9 @@ export function ProgrammeProvider({ children }) {
     recordCollection,
     submitReuse,
     reviewReuse,
+    reviewCollection,
+    viewAs,
+    exitViewAs,
     addComment,
     toggleReaction,
     saveActivity,

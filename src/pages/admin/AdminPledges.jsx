@@ -15,10 +15,11 @@ const SANDBOX_URL = `${typeof window !== "undefined" ? window.location.origin : 
 const QR = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(SANDBOX_URL)}`;
 
 export default function AdminPledges() {
-  const { board, config, month, pledges, dropsDone, logEvent, me } = useProgramme();
+  const { board, config, month, pledges, dropsDone, logEvent, me, saveSettings } = useProgramme();
   const [round, setRound] = useState(null);
   const [bidCount, setBidCount] = useState(0);
   const [notice, setNotice] = useState("");
+  const [code, setCode] = useState(String(config.joinCode || ""));
 
   const loadRound = useCallback(async () => {
     const [r, b] = await Promise.all([
@@ -63,6 +64,33 @@ export default function AdminPledges() {
     if (round) await base44.entities.SandboxRound.update(round.id, { status: "bidding", winner: "", revealedAt: null });
     setNotice("Sandbox round reset. Real programme records were not touched.");
     loadRound();
+  };
+
+  const saveCode = async (value) => {
+    const clean = String(value).replace(/\D/g, "").slice(0, 4);
+    if (clean && clean.length !== 4) {
+      setNotice("The join code must be four digits.");
+      return;
+    }
+    await saveSettings(
+      {
+        pledge: {
+          pledgeNightAt: config.pledgeNightAt,
+          finalBidOpenAt: config.finalBidOpenAt,
+          finalBidCloseAt: config.finalBidCloseAt,
+          monthCloseAt: config.monthCloseAt,
+          nextPledgeNightAt: config.nextPledgeNightAt,
+          multipliers: config.multipliers,
+          caps: config.caps,
+          joinCode: clean,
+        },
+      },
+      clean
+        ? `Sandbox pledge room join code set to ${clean}.`
+        : "Sandbox pledge room join code removed; the room is open again."
+    );
+    setCode(clean);
+    setNotice(clean ? `Join code ${clean} is live. Visitors must enter it before bidding.` : "Join code removed.");
   };
 
   const rows = board.map((r) => ({
@@ -177,6 +205,35 @@ export default function AdminPledges() {
             Participants bid, use final bid, then reveal or reset on the page itself. Starting and resetting here is
             written to the audit log.
           </p>
+
+          <div className="mt-3 border-t border-rule pt-3">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-sub">join code</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-sub">
+              Four digits the host reads out. Visitors must enter it on the demo page before they can bid. Leave it empty
+              to keep the room open.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input
+                inputMode="numeric"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="0000"
+                aria-label="Demo join code"
+                className="h-9 w-24 border border-rule bg-white px-3 text-[14px] tabular tracking-[0.3em] outline-none focus:border-ink"
+              />
+              <Pill size="sm" onClick={() => saveCode(code)}>save code</Pill>
+              <button
+                type="button"
+                onClick={() => saveCode("")}
+                className="rounded-full border border-rule px-3 py-1.5 text-[12px] lowercase text-sub hover:border-ink hover:text-ink"
+              >
+                remove code
+              </button>
+              <span className="text-[11px] text-sub">
+                {config.joinCode ? `live: ${config.joinCode}` : "no code set · bidding is open"}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

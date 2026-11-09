@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { activityByKey, formatSgt, timeAgo } from "@/lib/programme";
 import { useProgramme } from "@/lib/programmeData";
 import { authorLabel } from "@/lib/people";
-import { cropFor } from "@/lib/photoCrop";
 import Barcode from "./Barcode";
 import StatusChip from "./StatusChip";
 import PhotoUpload from "./PhotoUpload";
@@ -77,7 +76,7 @@ export default function PostModal({ reuse, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch justify-center bg-ink/70 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-ink/70 backdrop-blur-sm md:items-center md:p-6"
       onClick={onClose}
       role="presentation"
     >
@@ -86,25 +85,24 @@ export default function PostModal({ reuse, onClose }) {
         aria-modal="true"
         aria-label={`${activity.name} reuse record ${post.refId}`}
         onClick={(e) => e.stopPropagation()}
-        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-[1100px] sm:flex-row sm:rounded-[2px]"
+        className="grid h-[100dvh] w-full grid-cols-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-white md:h-[85vh] md:max-h-[85vh] md:max-w-[1100px] md:grid-cols-[55%_45%] md:grid-rows-1 md:rounded-[2px]"
       >
-        <div className="relative h-[34vh] shrink-0 bg-[#D6D2CD] sm:h-auto sm:min-h-[520px] sm:w-[55%]">
+        <div className="relative h-[45vh] max-h-[45vh] w-full overflow-hidden bg-[#D6D2CD] md:h-full md:max-h-none">
           {post.photoUrl ? (
             <img
               src={post.photoUrl}
               alt={`${activity.name} reuse on ${post.floorCode}`}
-              style={cropFor(post.refId).style}
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center text-[11px] uppercase tracking-[0.14em] text-sub">
+            <div className="flex h-full w-full items-center justify-center px-6 text-center text-[11px] uppercase tracking-[0.14em] text-sub">
               {post.kind === "question" ? "question to the other floors" : post.kind === "tip" ? "tip · no photo" : "no photo attached"}
             </div>
           )}
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col sm:w-[45%]">
-          <div className="flex items-center justify-between gap-3 border-b border-rule px-4 py-2.5">
+        <div className="flex min-h-0 min-w-0 flex-col md:h-full">
+          <div className="flex items-center justify-between gap-3 border-b border-rule px-8 py-3">
             <div className="flex flex-wrap items-center gap-2">
               <StatusChip status={post.status}>
                 {post.status === "pending" ? "pending validation" : post.status}
@@ -123,7 +121,7 @@ export default function PostModal({ reuse, onClose }) {
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+          <div className="min-h-0 flex-1 overflow-y-auto px-8 py-6">
             <p className="text-[11px] uppercase tracking-[0.14em] text-sub">
               {activity.name}
               {post.grams ? ` · ${post.grams} g reused` : ""}
@@ -310,7 +308,7 @@ export default function PostModal({ reuse, onClose }) {
             </div>
           </div>
 
-          <form onSubmit={submit} className="flex items-center gap-2 border-t border-rule px-4 py-3">
+          <form onSubmit={submit} className="flex items-center gap-2 border-t border-rule px-8 py-3">
             <input
               value={body}
               onChange={(e) => setBody(e.target.value)}
@@ -321,7 +319,7 @@ export default function PostModal({ reuse, onClose }) {
             <Pill type="submit" size="sm" disabled={!body.trim() || sending}>post</Pill>
           </form>
 
-          <div className="flex items-center gap-3 border-t border-rule bg-[#F7F5F3] px-4 py-2">
+          <div className="flex items-center gap-3 border-t border-rule bg-[#F7F5F3] px-8 py-2">
             <Barcode value={post.refId} height={18} showValue={false} className="w-[64px] shrink-0" />
             <span className="text-[9.5px] uppercase tracking-[0.14em] text-sub">record {post.refId}</span>
           </div>

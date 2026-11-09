@@ -8,6 +8,7 @@ import Skeleton from "@/components/cb/Skeleton";
 const NAV = [
   { to: "/admin", label: "Overview", end: true },
   { to: "/admin/activity", label: "Activity" },
+  { to: "/admin/validation", label: "Validation" },
   { to: "/admin/floors", label: "Floors" },
   { to: "/admin/pledges", label: "Pledges" },
   { to: "/admin/tables", label: "Collection tables" },
@@ -21,7 +22,7 @@ const NAV = [
 
 export default function AdminShell() {
   const { session, signOut } = useSession();
-  const { loading, me } = useProgramme();
+  const { loading, me, viewAs, exitViewAs } = useProgramme();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -56,6 +57,19 @@ export default function AdminShell() {
       <div className="border-b border-rule bg-canvas px-4 py-1 text-center text-[10px] uppercase tracking-[0.12em] text-sub">
         Pilot programme · quantities are weighed at collection and employee-reported at reuse
       </div>
+
+      {viewAs && (
+        <div className="flex flex-wrap items-center justify-center gap-3 bg-ink px-4 py-1.5 text-[11px] lowercase text-[#d8d4cf]">
+          <span>viewing the programme as {viewAs}</span>
+          <button
+            type="button"
+            onClick={() => exitViewAs()}
+            className="rounded-full border border-white/30 px-2.5 py-0.5 hover:border-white hover:text-white"
+          >
+            back to the administrator view
+          </button>
+        </div>
+      )}
 
       <div className="flex min-h-[calc(100vh-26px)]">
         <aside
@@ -98,7 +112,7 @@ export default function AdminShell() {
                 <span className="text-sub">Harbourline Bank</span>
               </p>
               <div className="mt-3 space-y-1.5">
-                <Link to="/" className="block text-sub hover:text-ink">view as employee →</Link>
+                <Link to="/?viewAs=chloe.tan@harbourline-demo.com" className="block text-sub hover:text-ink">view as employee →</Link>
                 <button
                   type="button"
                   onClick={() => {
@@ -130,7 +144,7 @@ export default function AdminShell() {
             </div>
             <div className="ml-auto flex items-center gap-2">
               <Link
-                to="/"
+                to="/?viewAs=chloe.tan@harbourline-demo.com"
                 className="hidden rounded-full border border-rule px-3 py-1.5 text-[12px] lowercase text-sub hover:border-ink hover:text-ink sm:block"
               >
                 view as employee

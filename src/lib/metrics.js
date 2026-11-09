@@ -12,7 +12,10 @@ export function floorRows({ month, reuses = [], collections = [], eligibleByFloo
   return FLOORS.map((f) => {
     const eligible = eligibleByFloor[f.code] ?? f.eligible;
     const cRows = collections.filter(
-      (c) => c.floorCode === f.code && (!month || monthOf(c.occurredAt) === month)
+      (c) =>
+        c.floorCode === f.code &&
+        c.tableStatus !== "rejected" &&
+        (!month || monthOf(c.occurredAt) === month)
     );
     const rRows = reuses.filter(
       (r) => r.floorCode === f.code && (!month || monthOf(r.occurredAt) === month)

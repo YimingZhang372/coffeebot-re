@@ -104,7 +104,7 @@
     },
     "pledge": {
       "type": "object",
-      "description": "Pledge Auction dates, multipliers and point caps",
+      "description": "Pledge Auction dates, multipliers, point caps and the sandbox join code",
       "properties": {
         "pledgeNightAt": {
           "type": "string"
@@ -120,6 +120,10 @@
         },
         "nextPledgeNightAt": {
           "type": "string"
+        },
+        "joinCode": {
+          "type": "string",
+          "description": "Four-digit code visitors enter before bidding in the sandbox pledge room"
         },
         "multipliers": {
           "type": "object",
@@ -184,5 +188,6 @@
     "create": {},
     "update": {},
     "delete": {}
-  }
+  },
+  "required": []
 }

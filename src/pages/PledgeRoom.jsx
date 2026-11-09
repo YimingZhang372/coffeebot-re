@@ -21,14 +21,20 @@ export default function PledgeRoom() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [drafts, setDrafts] = useState({});
+  const [joinCode, setJoinCode] = useState("");
+  const [codeEntry, setCodeEntry] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [codeError, setCodeError] = useState("");
 
   const load = useCallback(async () => {
-    const [r, b] = await Promise.all([
+    const [r, b, s] = await Promise.all([
       all(base44.entities.SandboxRound.filter({ key: KEY })),
       all(base44.entities.SandboxBid.filter({ roundKey: KEY }, { sort: "-createdAt", limit: 200 })),
+      all(base44.entities.ProgrammeSetting.list({ limit: 1 })),
     ]);
     setRound(r[0] || null);
     setBids(b);
+    setJoinCode(String(s[0]?.pledge?.joinCode || ""));
     setLoading(false);
   }, []);
 
@@ -55,6 +61,7 @@ export default function PledgeRoom() {
 
   const status = round?.status || "closed";
   const revealed = status === "revealed";
+  const needsCode = Boolean(joinCode) && !unlocked;
 
   const board = useMemo(
     () =>
@@ -143,6 +150,10 @@ export default function PledgeRoom() {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
+      <div className="bg-ink px-5 py-2 text-center text-[11px] uppercase tracking-[0.12em] text-[#d8d4cf]">
+        Demo round · not linked to Harbourline records · resets after each session
+      </div>
+
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-rule px-5 py-4 sm:px-10">
         <div className="flex items-center gap-3">
           <img src={IMG.logo} alt="CoffeeBot" className="h-9 w-auto" />
@@ -198,6 +209,40 @@ export default function PledgeRoom() {
 
         {error && <p className="mt-3 text-[12px] text-[#A44A3F]">{error}</p>}
 
+        {needsCode && (
+          <div className="mt-6 flex flex-wrap items-end gap-3 border border-ink bg-paper p-4">
+            <div className="min-w-[220px] flex-1">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-sub">join code</p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-sub">
+                The host reads out a four-digit code. Enter it to place bids in this demo round.
+              </p>
+            </div>
+            <input
+              inputMode="numeric"
+              value={codeEntry}
+              onChange={(e) => {
+                setCodeEntry(e.target.value.replace(/\D/g, "").slice(0, 4));
+                setCodeError("");
+              }}
+              placeholder="0000"
+              aria-label="Four-digit join code"
+              className="h-11 w-24 border border-rule bg-white px-3 text-[16px] tabular tracking-[0.3em] outline-none focus:border-ink"
+            />
+            <button
+              type="button"
+              disabled={codeEntry.length !== 4}
+              onClick={() => {
+                if (codeEntry === joinCode) setUnlocked(true);
+                else setCodeError("That code does not match the one on screen.");
+              }}
+              className="h-11 rounded-full bg-ink px-5 text-[12px] lowercase text-white transition-colors hover:bg-caramel disabled:opacity-40"
+            >
+              join the round
+            </button>
+            {codeError && <p className="w-full text-[12px] text-[#A44A3F]">{codeError}</p>}
+          </div>
+        )}
+
         {loading ? (
           <p className="mt-8 text-[13px] text-sub">Loading the board…</p>
         ) : (
@@ -240,18 +285,23 @@ export default function PledgeRoom() {
                       value={drafts[f.floor] ?? ""}
                       onChange={(e) => setDrafts((d) => ({ ...d, [f.floor]: e.target.value.replace(/\D/g, "").slice(0, 3) }))}
                       placeholder="+%"
-                      className="h-10 w-20 border border-rule bg-white px-3 text-[14px] tabular outline-none focus:border-ink"
+                      disabled={needsCode}
+                      className="h-10 w-20 border border-rule bg-white px-3 text-[14px] tabular outline-none focus:border-ink disabled:opacity-40"
                     />
                     <button
                       type="button"
-                      disabled={busy || !round || status === "closed"}
+                      disabled={busy || !round || status === "closed" || needsCode}
                       onClick={() => bid(f.floor)}
                       className="rounded-full bg-ink px-4 py-2 text-[12px] lowercase text-white transition-colors hover:bg-caramel disabled:opacity-40"
                     >
                       bid
                     </button>
                     <span className="text-[11px] text-sub">
-                      {latest[f.floor] ? `raised from +${latest[f.floor].bid}%` : "no bid yet"}
+                      {needsCode
+                        ? "enter the join code to bid"
+                        : latest[f.floor]
+                        ? `raised from +${latest[f.floor].bid}%`
+                        : "no bid yet"}
                     </span>
                   </div>
                 )}

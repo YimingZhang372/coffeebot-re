@@ -17,10 +17,12 @@ export default function Me() {
   const { me, myCollections, myReuses, certificates, month, config } = useProgramme();
   const [filter, setFilter] = useState("all");
 
-  const collected = myCollections.reduce((s, c) => s + c.grams, 0);
+  const collected = myCollections.reduce((s, c) => s + (c.grams || 0), 0);
   const validated = myReuses.filter((r) => r.status === "validated");
-  const reused = validated.reduce((s, r) => s + r.grams, 0);
+  const reused = validated.reduce((s, r) => s + (r.grams || 0), 0);
   const hours = volunteerHours(myReuses, config);
+  const hoursTotal = Number.isFinite(hours.total) ? hours.total : 0;
+  const leaveAt = Number.isFinite(config.volunteer.leaveAt) ? config.volunteer.leaveAt : 10;
 
   const quarterReuses = myReuses.filter((r) => r.occurredAt >= "2026-10-01" && r.occurredAt <= "2026-12-31");
   const quarterValidated = quarterReuses.filter((r) => r.status === "validated");
@@ -34,11 +36,11 @@ export default function Me() {
     periodLabel: "Q4 2026 (October to December)",
     office: me?.office || "Marina Bay",
     floorCode: me?.floorCode,
-    kgCollected: Number((quarterCollected.reduce((s, c) => s + c.grams, 0) / 1000).toFixed(2)),
-    kgReused: Number((quarterValidated.reduce((s, r) => s + r.grams, 0) / 1000).toFixed(2)),
+    kgCollected: Number((quarterCollected.reduce((s, c) => s + (c.grams || 0), 0) / 1000).toFixed(2)),
+    kgReused: Number((quarterValidated.reduce((s, r) => s + (r.grams || 0), 0) / 1000).toFixed(2)),
     reuseRate: 0,
     activitiesDone: quarterValidated.length,
-    volunteeringHours: quarterHours.total,
+    volunteeringHours: Number.isFinite(quarterHours.total) ? quarterHours.total : 0,
     nextTarget: "1 reuse record per month",
     issuedAt: new Date().toISOString(),
   };
@@ -60,25 +62,56 @@ export default function Me() {
     return filter === "all" ? merged : merged.filter((m) => m.kind === filter);
   }, [myCollections, myReuses, filter]);
 
-  return (
-    <div className="space-y-9">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-sub">
-            me · {me?.floorCode} {me?.department}
-          </p>
-          <h1 className="display mt-3 text-[46px] sm:text-[76px]">{me?.name}</h1>
-          <p className="mt-2 text-[13px] text-sub">
-            {me?.role === "champion" ? "Floor Champion" : me?.role === "admin" ? "Sustainability Admin" : "Employee"} ·{" "}
-            {me?.email} · joined {formatSgt(me?.joinedAt, false)}
-          </p>
-        </div>
+  const isProgrammeAdmin =
+    me?.role === "admin" && myCollections.length === 0 && myReuses.length === 0;
+
+  const header = (
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.18em] text-sub">
+          me · {me?.floorCode || "programme team"} {me?.department}
+        </p>
+        <h1 className="display mt-3 text-[46px] sm:text-[76px]">{me?.name}</h1>
+        <p className="mt-2 text-[13px] text-sub">
+          {me?.role === "champion" ? "Floor Champion" : me?.role === "admin" ? "Sustainability Admin" : "Employee"} ·{" "}
+          {me?.email} · joined {formatSgt(me?.joinedAt, false)}
+        </p>
+      </div>
+      {!isProgrammeAdmin && (
         <div className="text-right text-[11px] uppercase leading-relaxed tracking-[0.14em] text-sub">
           {myCollections.length} collections · {myReuses.length} reuse records
           <br />
           {monthLabel(month)} to date
         </div>
+      )}
+    </div>
+  );
+
+  if (isProgrammeAdmin) {
+    return (
+      <div className="space-y-9">
+        {header}
+        <div className="border-y border-rule bg-paper px-6 py-10">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-sub">programme administrator</p>
+          <h2 className="mt-2 max-w-[34ch] text-[24px] leading-tight text-ink sm:text-[30px]">
+            Programme administrator, no personal collections.
+          </h2>
+          <p className="mt-3 max-w-[62ch] text-[13px] leading-relaxed text-sub">
+            This account runs the programme rather than takes part in it. Employee collections, reuse records,
+            certificates and volunteer hours stay on each colleague&rsquo;s own page.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Pill to="/admin" size="sm">open the console</Pill>
+            <Pill to="/community" variant="outline" size="sm">view the community</Pill>
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-9">
+      {header}
 
       <div className="grid grid-cols-2 gap-px bg-rule border-y border-rule lg:grid-cols-4">
         {[
@@ -87,7 +120,7 @@ export default function Me() {
           { label: "activities done", value: validated.length, unit: "all time", decimals: 0 },
           {
             label: "volunteering hours",
-            value: hours.total,
+            value: hoursTotal,
             unit: `max ${config.volunteer.monthlyCap} h a month`,
             decimals: 1,
           },
@@ -186,23 +219,23 @@ export default function Me() {
           <div className="bg-paper p-5">
             <p className="text-[11px] uppercase tracking-[0.14em] text-sub">volunteer leave</p>
             <p className="display mt-2 flex items-baseline gap-2 text-[34px]">
-              {hours.total.toFixed(1)}
-              <span className="text-[13px] lowercase tracking-normal text-sub">/ {config.volunteer.leaveAt} h</span>
+              {hoursTotal.toFixed(1)}
+              <span className="text-[13px] lowercase tracking-normal text-sub">/ {leaveAt} h</span>
             </p>
             <div className="mt-2 h-[3px] w-full bg-rule">
               <span
                 className="block h-[3px] bg-verdant"
-                style={{ width: `${leaveProgress(hours.total, config.volunteer.leaveAt)}%` }}
+                style={{ width: `${leaveProgress(hoursTotal, leaveAt)}%` }}
               />
             </div>
             <p className="mt-2 text-[12px] leading-relaxed text-sub">
-              Every {config.volunteer.leaveAt} h = half a day of volunteer leave. 1 validated activity ={" "}
+              Every {leaveAt} h = half a day of volunteer leave. 1 validated activity ={" "}
               {config.volunteer.hoursPerActivity} h, capped at {config.volunteer.monthlyCap} h a month and{" "}
               {config.volunteer.annualCap} h a year. Hours export monthly to the bank&rsquo;s volunteer system.
             </p>
             <p className="mt-2 text-[11px] text-sub">
-              {hours.total < config.volunteer.leaveAt
-                ? `${(config.volunteer.leaveAt - hours.total).toFixed(1)} h to the next half day`
+              {hoursTotal < leaveAt
+                ? `${(leaveAt - hoursTotal).toFixed(1)} h to the next half day`
                 : "half a day of volunteer leave earned"}
             </p>
           </div>
