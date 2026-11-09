@@ -92,7 +92,7 @@ export default function PostModal({ reuse, onClose }) {
             <img
               src={post.photoUrl}
               alt={`${activity.name} reuse on ${post.floorCode}`}
-              className="h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center px-6 text-center text-[11px] uppercase tracking-[0.14em] text-sub">
