@@ -14,7 +14,19 @@ import { leaveProgress, volunteerHours } from "@/lib/benefits";
 const QUARTER = "2026-Q4";
 
 export default function Me() {
-  const { me, myCollections, myReuses, certificates, month, config } = useProgramme();
+  const programme = useProgramme();
+  const { certificates, month, config, employees = [], collections = [], reuses = [] } = programme;
+  // Admin accounts have no personal records: show the demo Champion (Chloe Tan, L10) instead.
+  const adminNoData =
+    programme.me?.role === "admin" && programme.myCollections.length === 0 && programme.myReuses.length === 0;
+  const demo = adminNoData
+    ? employees.find((e) => e.name === "Chloe Tan") ||
+      employees.find((e) => e.role === "champion" && e.floorCode === "L10") ||
+      employees.find((e) => collections.some((c) => c.employeeEmail === e.email))
+    : null;
+  const me = demo || programme.me;
+  const myCollections = demo ? collections.filter((c) => c.employeeEmail === demo.email) : programme.myCollections;
+  const myReuses = demo ? reuses.filter((r) => r.employeeEmail === demo.email) : programme.myReuses;
   const [filter, setFilter] = useState("all");
 
   const collected = myCollections.reduce((s, c) => s + (c.grams || 0), 0);
@@ -64,10 +76,16 @@ export default function Me() {
 
   const isProgrammeAdmin =
     me?.role === "admin" && myCollections.length === 0 && myReuses.length === 0;
+  const demoBanner = demo ? (
+    <p className="text-[11px] uppercase tracking-[0.14em] text-caramel">
+      demo view · employee page of {demo.name} ({demo.floorCode})
+    </p>
+  ) : null;
 
   const header = (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
+        {demoBanner}
         <p className="text-[11px] uppercase tracking-[0.18em] text-sub">
           me · {me?.floorCode || "programme team"} {me?.department}
         </p>
