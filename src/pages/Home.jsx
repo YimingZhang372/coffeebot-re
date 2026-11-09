@@ -13,7 +13,6 @@ import GroundDropCalendar from "@/components/cb/GroundDropCalendar";
 import NudgeList from "@/components/cb/NudgeList";
 import Pill from "@/components/cb/Pill";
 import StatusChip from "@/components/cb/StatusChip";
-import ImpactLine from "@/components/cb/ImpactLine";
 
 const DROPS_PER_MONTH = 4;
 
