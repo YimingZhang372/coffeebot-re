@@ -72,10 +72,16 @@ export default function Collect() {
     if (!flow?.grams || Number(flow.grams) < 10) return;
     setSaving(true);
     const beforeRank = myRow?.rank;
-    const created = await recordCollection({ grams: Number(flow.grams), proofPhotoUrl: flow.photo });
-    setSaving(false);
-    setResult({ created, beforeRank, grams: Number(flow.grams), evidence: flow.photo ? "Weighed" : "Reported" });
-    setFlow(null);
+    try {
+      const created = await recordCollection({ grams: Number(flow.grams), proofPhotoUrl: flow.photo });
+      setResult({ created, beforeRank, grams: Number(flow.grams), evidence: flow.photo ? "Weighed" : "Reported" });
+      setFlow(null);
+    } catch (err) {
+      console.error("recordCollection failed", err);
+      window.alert(`Could not record the collection: ${err?.message || "please try again"}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const monthCollections = collections.filter(
