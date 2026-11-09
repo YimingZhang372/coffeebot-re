@@ -9,7 +9,7 @@ import AdminTable from "@/components/admin/AdminTable";
 import { downloadCsv } from "@/lib/csv";
 
 export default function AdminOverview() {
-  const { rows, office, prevOffice, reuses, collections, month, settings, employees, config } = useProgramme();
+  const { rows, office, prevOffice, reuses, collections, month, settings, employees, config, dropsDone } = useProgramme();
   const target = settings?.participationTarget ?? 30;
 
   const hoursRows = useMemo(() => {
@@ -50,8 +50,18 @@ export default function AdminOverview() {
     });
     return Object.entries(map)
       .sort()
-      .map(([k, g]) => ({ month: monthLabel(k).slice(0, 3), kg: Number((g / 1000).toFixed(2)) }));
-  }, [reuses]);
+      .map(([k, g]) => {
+        const kg = Number((g / 1000).toFixed(2));
+        if (k !== month) return { month: monthLabel(k).slice(0, 3), kg, projected: null };
+        const done = dropsDone || 1;
+        return {
+          month: `${monthLabel(k).slice(0, 3)} (to date)`,
+          kg,
+          projected: Number(((kg * 4) / done).toFixed(2)),
+        };
+      })
+      .map((d, i, arr) => (i === arr.length - 2 && arr[arr.length - 1].projected != null ? { ...d, projected: d.kg } : d));
+  }, [reuses, month, dropsDone]);
 
   const byActivity = useMemo(() => {
     const map = {};
@@ -61,7 +71,19 @@ export default function AdminOverview() {
     return Object.entries(map).map(([k, count]) => ({ name: activityByKey(k).name, count }));
   }, [reuses]);
 
-  const delta = prevOffice.reused ? ((office.reused - prevOffice.reused) / prevOffice.reused) * 100 : 0;
+  // Compare with the same point last month (first N days), not with a full month.
+  const dayCut = Number(new Date().toLocaleString("en-CA", { timeZone: "Asia/Singapore", day: "2-digit" }));
+  const [y, m] = month.split("-").map(Number);
+  const prevKey = `${m === 1 ? y - 1 : y}-${String(m === 1 ? 12 : m - 1).padStart(2, "0")}`;
+  const prevSamePoint = reuses
+    .filter(
+      (r) =>
+        r.status === "validated" &&
+        String(r.occurredAt).slice(0, 7) === prevKey &&
+        Number(String(r.occurredAt).slice(8, 10)) <= dayCut
+    )
+    .reduce((s, r) => s + (r.grams || 0), 0);
+  const delta = prevSamePoint ? ((office.reused - prevSamePoint) / prevSamePoint) * 100 : 0;
 
   const results = rows.map((r) => ({
     ...r,
@@ -85,7 +107,7 @@ export default function AdminOverview() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <AdminKpi label="kg diverted from disposal" value={office.diverted / 1000} decimals={2} unit="kg" change={delta} primary note="GRI 306-4" />
+        <AdminKpi label="kg diverted from disposal" value={office.diverted / 1000} decimals={2} unit="kg" change={delta} primary note={`vs same point in ${monthLabel(prevKey)} · GRI 306-4`} />
         <AdminKpi label="kg collected" value={office.collected / 1000} decimals={2} unit="kg" note="weighed at collection" />
         <AdminKpi label="reuse rate" value={office.reuseRate} decimals={1} unit="%" note="reused ÷ collected" />
         <AdminKpi label="participating employees" value={office.participants} unit={`of ${office.eligible}`} note={`${Math.round(office.participation)}% of eligible`} />
@@ -102,7 +124,8 @@ export default function AdminOverview() {
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6E6A66" }} axisLine={{ stroke: "#CFCBC6" }} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#6E6A66" }} axisLine={false} tickLine={false} unit=" kg" width={52} />
                 <Tooltip contentStyle={{ fontSize: 12, border: "1px solid #CFCBC6", borderRadius: 2 }} />
-                <Line type="monotone" dataKey="kg" stroke="#141414" strokeWidth={1.6} dot={{ r: 3, fill: "#5E7D5A" }} />
+                <Line type="monotone" dataKey="kg" name="validated" stroke="#141414" strokeWidth={1.6} dot={{ r: 3, fill: "#5E7D5A" }} />
+                <Line type="monotone" dataKey="projected" name="projected full month" stroke="#B9875A" strokeWidth={1.4} strokeDasharray="4 4" dot={{ r: 3, fill: "#B9875A" }} connectNulls={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
