@@ -33,8 +33,8 @@ export default function PostCard({ reuse, onOpen }) {
             <img
               src={reuse.photoUrl}
               alt={`${activity.name} reuse on ${reuse.floorCode}`}
-              style={cropFor(reuse.refId).style}
-              className="h-full w-full object-cover"
+              style={{ objectPosition: cropFor(reuse.refId).style.objectPosition }}
+              className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute left-3 top-3 flex items-center gap-2">
               <StatusChip status={reuse.status} className="bg-white/90">
