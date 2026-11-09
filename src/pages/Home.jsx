@@ -25,6 +25,8 @@ export default function Home() {
   const reduce = useReducedMotion();
 
   const divertedKg = office.reused / 1000;
+  const sinceLaunchKg =
+    reuses.filter((r) => r.status === "validated").reduce((s, r) => s + (r.grams || 0), 0) / 1000;
   const targetKg = settings?.monthlyTargetKg ?? 6;
   const projectedKg = dropsDone > 0 ? (divertedKg * DROPS_PER_MONTH) / dropsDone : divertedKg;
   const monthName = monthLabel(month);
@@ -113,20 +115,24 @@ export default function Home() {
         className="grid grid-cols-1 gap-8 border-y border-rule py-7 lg:grid-cols-[1.35fr_1fr] lg:items-end"
       >
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-sub">kg diverted from disposal</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-sub">kg diverted from disposal · since launch, 8 sep 2026</p>
           <div className="display mt-2 flex items-baseline gap-3 text-[clamp(64px,11vw,132px)]">
-            <CountUp value={divertedKg} decimals={2} />
+            <CountUp value={sinceLaunchKg} decimals={1} />
             <span className="text-[24px] lowercase tracking-normal sm:text-[32px]">kg</span>
           </div>
-          <p className="mt-1 text-[13px] text-sub">
-            {monthName} to date · {office.participants} of {office.eligible} employees participating
+          <p className="mt-2 max-w-[46ch] text-[17px] leading-snug text-ink">
+            = {Math.round((sinceLaunchKg * 1000) / 15).toLocaleString("en-SG")} coffees, or{" "}
+            {Math.round(sinceLaunchKg / 2.05)} working days of all Marina Bay coffee kept out of the bin.
+          </p>
+          <p className="mt-3 text-[13px] text-sub">
+            this month: <span className="tabular text-ink">{divertedKg.toFixed(2)} kg</span> to date ·{" "}
+            {office.participants} of {office.eligible} employees participating
           </p>
           <p className="mt-1 text-[13px] text-sub">
             reuse rate{" "}
             <span className="tabular text-ink">{office.reuseRate.toFixed(0)}%</span> · {divertedKg.toFixed(2)} kg
             reused of <span className="tabular text-ink">{(office.collected / 1000).toFixed(2)} kg</span> collected
           </p>
-          <ImpactLine grams={office.reused} scope="office" className="mt-1.5" />
         </div>
         <div className="space-y-4">
           <div>
