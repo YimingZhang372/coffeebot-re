@@ -224,12 +224,13 @@ export function ProgrammeProvider({ children }) {
     async ({ grams, proofPhotoUrl }) => {
       const refId = nextRef(collections, "COL", "refId", 240);
       const evidenceLevel = proofPhotoUrl ? "Weighed" : "Reported";
+      const floorCode = me?.floorCode || "L10";
       const created = await base44.entities.Collection.create({
         refId,
-        employeeEmail: me.email,
-        employeeName: me.name,
-        employeeRef: me.refId,
-        floorCode: me.floorCode,
+        employeeEmail: me?.email || "",
+        employeeName: me?.name || "",
+        employeeRef: me?.refId || "",
+        floorCode,
         office: me.office || "Marina Bay",
         grams: Number(grams),
         evidenceLevel,
@@ -239,20 +240,20 @@ export function ProgrammeProvider({ children }) {
         groundDropDate: new Date().toISOString().slice(0, 10),
         needsReview: !proofPhotoUrl,
       });
-      await logEvent({
+      logEvent({
         eventType: "collection",
-        employeeLabel: maskLabel(me.email, false, me.floorCode),
-        employeeEmail: me.email,
-        floorCode: me.floorCode,
+        employeeLabel: maskLabel(me?.email, false, floorCode),
+        employeeEmail: me?.email || "",
+        floorCode,
         quantity: Number(grams),
         quantityUnit: "g collected",
         status: evidenceLevel,
         actor: "Self-service",
         entityRef: refId,
-        detail: `Weighed at the ${me.floorCode} collection table.`,
+        detail: `Weighed at the ${floorCode} collection table.`,
         photoUrl: proofPhotoUrl || "",
-      });
-      await refresh();
+      }).catch((e) => console.error("logEvent failed", e));
+      refresh();
       return created;
     },
     [collections, me, logEvent, maskLabel, refresh]
