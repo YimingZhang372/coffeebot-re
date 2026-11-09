@@ -1,16 +1,15 @@
 import { useMemo, useState } from "react";
 import { useProgramme } from "@/lib/programmeData";
 import { monthLabel, timeAgo } from "@/lib/programme";
-import { groundDropState } from "@/lib/groundDrop";
+import { clockLabel, shortDate } from "@/lib/pledge";
 import { IMG } from "@/lib/assets";
 import Pill from "@/components/cb/Pill";
 import StatusChip from "@/components/cb/StatusChip";
 
 export default function AdminEmail() {
-  const { rows, reuses, settings, month, logEvent, me } = useProgramme();
+  const { reuses, settings, month, logEvent, me, board, config } = useProgramme();
   const [sent, setSent] = useState(false);
-  const st = groundDropState(settings);
-  const winner = rows[0];
+  const winner = board[0];
 
   const bestPost = useMemo(() => {
     const validated = reuses.filter(
@@ -43,7 +42,8 @@ export default function AdminEmail() {
         <div>
           <h1 className="text-[20px] font-semibold">Monthly email</h1>
           <p className="text-[12px] text-sub">
-            Drafted from the leaderboard records. Sent through Harbourline&rsquo;s internal email, not from CoffeeBot.
+            Drafted from the pledge board and the leaderboard records. Sent through Harbourline&rsquo;s internal email,
+            not from CoffeeBot.
           </p>
         </div>
         <StatusChip status={sent ? "validated" : "pending"}>{sent ? "sent" : "draft"}</StatusChip>
@@ -58,31 +58,36 @@ export default function AdminEmail() {
               from Group Sustainability, Harbourline Bank · {monthLabel(month)}
             </p>
             <h2 className="mt-2 text-[20px] font-semibold leading-snug">
-              {winner?.code} takes {monthLabel(month)}: {((winner?.reused || 0) / 1000).toFixed(2)} kg of grounds reused
+              {winner?.code} wins the {monthLabel(month)} Pledge Auction on {Math.round(winner?.score || 0)} points
             </h2>
             <p className="mt-3 text-[13px] leading-relaxed text-ink">
-              Colleagues across Marina Bay took {((rows.reduce((s, r) => s + r.collected, 0)) / 1000).toFixed(2)} kg of
-              spent grounds off the coffee machines this month and reported{" "}
-              {((rows.reduce((s, r) => s + r.reused, 0)) / 1000).toFixed(2)} kg put back to use at home. That is{" "}
-              {rows.reduce((s, r) => s + r.participants, 0)} colleagues across six floors.
+              Six floors bid the uplift they would reach, and delivered {Math.round(board.reduce((s, r) => s + r.projected, 0) / 6)} g
+              per employee against a {Math.round(board.reduce((s, r) => s + r.baselinePer, 0) / 6)} g baseline. Half volume,
+              half uplift: {winner?.code} took it with a {winner?.bid}% bid
+              {winner ? ` and ${winner.paceMet ? "an on-pace month" : "a late surge"}` : ""}.
             </p>
 
             <table className="mt-4 w-full border-collapse text-[12px]">
               <thead>
                 <tr>
-                  {["Rank", "Floor", "kg reused", "g / employee", "Participation"].map((h) => (
-                    <th key={h} className="border-b border-rule py-1.5 text-left text-[10px] uppercase tracking-[0.12em] text-sub">{h}</th>
+                  {["Floor", "Bid", "Result g", "Volume pts", "Uplift pts", "Score"].map((h) => (
+                    <th key={h} className="border-b border-rule py-1.5 text-left text-[10px] uppercase tracking-[0.12em] text-sub">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {board.map((r) => (
                   <tr key={r.code} className="border-b border-rule/60">
-                    <td className="py-1.5 tabular">{r.rank}</td>
                     <td className="py-1.5">{r.code} · {r.name}</td>
-                    <td className="py-1.5 tabular">{(r.reused / 1000).toFixed(2)}</td>
-                    <td className="py-1.5 tabular">{Math.round(r.perEmployee)}</td>
-                    <td className="py-1.5 tabular">{Math.round(r.participation)}%</td>
+                    <td className="py-1.5 tabular">
+                      {r.finalBid != null ? `${r.bid}→${r.finalBid}%` : `${r.bid}%`}
+                    </td>
+                    <td className="py-1.5 tabular">{Math.round(r.projected)}</td>
+                    <td className="py-1.5 tabular">{Math.round(r.volumePts)}</td>
+                    <td className="py-1.5 tabular">{r.upliftPts.toFixed(1)}</td>
+                    <td className="py-1.5 tabular">{Math.round(r.score)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -91,19 +96,18 @@ export default function AdminEmail() {
             <div className="mt-4 border-t border-rule pt-3 text-[13px] leading-relaxed">
               <p>
                 <span className="font-medium">Floor of the month: </span>
-                {winner?.code} · {winner?.name}. The prize this month is a team breakfast at Marina Bay funded by
-                Harbourline, or a donation to a charity chosen by the floor.
+                {winner?.code} · {winner?.name}. The prize is a team breakfast at Marina Bay funded by Harbourline, or a
+                donation to a charity chosen by the floor.
               </p>
               {bestPost && (
                 <p className="mt-2">
                   <span className="font-medium">Best anonymous post: </span>
-                  {bestPost.floorCode} colleague, {bestPost.grams} g reused for{" "}
-                  {bestPost.activityKey === "mushrooms" ? "an oyster mushroom kit" : bestPost.activityKey === "plant" ? "plant fertiliser" : bestPost.activityKey === "compost" ? "a compost booster" : "a fridge deodoriser"}{" "}
-                  ({timeAgo(bestPost.occurredAt)}).
+                  {bestPost.floorCode} colleague, {bestPost.grams} g reused ({timeAgo(bestPost.occurredAt)}).
                 </p>
               )}
               <p className="mt-2 text-sub">
-                Next Ground Drop: {st.nextLabel} at {st.time}. Clear-out {st.clearOutLabel}.
+                Next Pledge Night: {shortDate(config.nextPledgeNightAt)}, {clockLabel(config.nextPledgeNightAt)} for
+                December. Final bid window opens {shortDate(config.finalBidOpenAt)}.
               </p>
             </div>
 
@@ -127,9 +131,10 @@ export default function AdminEmail() {
           <div className="border border-rule bg-paper p-4">
             <p className="text-[11px] uppercase tracking-[0.12em] text-sub">checks</p>
             <ul className="mt-2 space-y-1.5 text-[12px]">
-              <li className="flex justify-between"><span className="text-sub">results for every floor</span><span className="text-verdant">included</span></li>
-              <li className="flex justify-between"><span className="text-sub">winning floor and prize</span><span className="text-verdant">included</span></li>
-              <li className="flex justify-between"><span className="text-sub">best anonymous post</span><span className={bestPost ? "text-verdant" : "text-sub"}>{bestPost ? "included" : "none found"}</span></li>
+              <li className="flex justify-between"><span className="text-sub">bid and result per floor</span><span className="text-verdant">included</span></li>
+              <li className="flex justify-between"><span className="text-sub">volume and uplift points</span><span className="text-verdant">included</span></li>
+              <li className="flex justify-between"><span className="text-sub">winner and prize</span><span className="text-verdant">included</span></li>
+              <li className="flex justify-between"><span className="text-sub">next pledge night</span><span className="text-verdant">included</span></li>
               <li className="flex justify-between"><span className="text-sub">no individual names</span><span className="text-verdant">checked</span></li>
             </ul>
             <Pill className="mt-4 w-full" onClick={send} disabled={sent}>

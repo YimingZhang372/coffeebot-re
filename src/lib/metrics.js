@@ -1,4 +1,5 @@
 import { FLOORS } from "./programme";
+import { pledgeMarquee } from "./pledge";
 
 export const monthOf = (iso) => String(iso || "").slice(0, 7);
 
@@ -88,17 +89,7 @@ export function publicNudges({ rows, myRow, monthLabel, daysLeft }) {
   return out;
 }
 
-export function marqueeItems({ rows, myRow, nextDropLabel, challenge }) {
-  const items = [];
-  if (rows[0]) items.push(`${rows[0].code} leads the office on g reused per employee`);
-  if (myRow) {
-    const idx = rows.findIndex((r) => r.code === myRow.code);
-    const above = rows[idx - 1];
-    if (above) items.push(`${above.code} is ${Math.max(1, Math.round(above.perEmployee - myRow.perEmployee))} g per employee ahead of ${myRow.code}`);
-    const needed = Math.ceil((myRow.target / 100) * myRow.eligible) - myRow.participants;
-    if (needed > 0) items.push(`${needed} more ${needed === 1 ? "colleague" : "colleagues"} for ${myRow.code} to hit ${myRow.target}%`);
-  }
-  if (nextDropLabel) items.push(`next ground drop ${nextDropLabel}`);
-  if (challenge) items.push(`${challenge.fromFloor} vs ${challenge.toFloor} challenge live`);
-  return items;
+/** Live marquee lines. The Pledge Auction is the only competition. */
+export function marqueeItems({ board = [], config, month } = {}) {
+  return pledgeMarquee({ board, config, month });
 }

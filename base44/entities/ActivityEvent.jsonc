@@ -19,7 +19,8 @@
         "settings.changed",
         "employee.joined",
         "reaction",
-        "challenge.created",
+        "bid.placed",
+        "sandbox.started",
         "decision.override",
         "nudge.sent",
         "email.sent"
@@ -35,6 +36,7 @@
         "yellow",
         "gray",
         "gray",
+        "blue",
         "blue",
         "red",
         "yellow",

@@ -3,7 +3,7 @@ import { useProgramme } from "@/lib/programmeData";
 import { activityByKey } from "@/lib/programme";
 import { cropFor } from "@/lib/photoCrop";
 
-const SLOTS = [0, 1, null, 2, 3, 4, null, 5, 6, 7, null, 8];
+const SLOTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, null];
 
 /** Tight grid of the latest Champion-validated reuses. */
 export default function LoginGrid() {
@@ -35,7 +35,7 @@ export default function LoginGrid() {
                 style={crop}
                 className="h-full w-full object-cover grayscale opacity-75 transition-all duration-500 ease-out group-hover:scale-[1.03] group-hover:grayscale-0 group-hover:opacity-100"
               />
-              <span className="absolute left-1.5 top-1.5 bg-ink/85 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.1em] text-white/0 transition-colors duration-300 group-hover:text-white">
+              <span className="pointer-events-none absolute left-1.5 top-1.5 bg-transparent px-1.5 py-0.5 text-[9px] uppercase tracking-[0.1em] text-transparent transition-colors duration-300 group-hover:bg-ink/85 group-hover:text-white">
                 {post.floorCode} · {activityByKey(post.activityKey).name}
               </span>
             </figure>

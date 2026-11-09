@@ -1,0 +1,64 @@
+{
+  "name": "Pledge",
+  "type": "object",
+  "properties": {
+    "month": {
+      "type": "string",
+      "description": "Auction month, YYYY-MM"
+    },
+    "floorCode": {
+      "type": "string"
+    },
+    "openingBid": {
+      "type": "number",
+      "description": "Uplift percentage pledged at Pledge Night"
+    },
+    "finalBid": {
+      "type": "number",
+      "description": "Raised bid placed in the final bid window; null when the floor never raised"
+    },
+    "bids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "type": "string"
+          },
+          "pct": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "opening",
+              "final"
+            ],
+            "enumColors": [
+              "gray",
+              "blue"
+            ]
+          }
+        }
+      }
+    },
+    "createdBy": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "month",
+    "floorCode",
+    "openingBid"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

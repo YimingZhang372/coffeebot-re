@@ -7,7 +7,7 @@ import Skeleton from "@/components/cb/Skeleton";
 const TYPES = [
   "collection", "reuse.submitted", "post.validated", "post.rejected",
   "certificate.issued", "certificate.revoked", "settings.changed", "employee.joined",
-  "decision.override", "challenge.created", "nudge.sent",
+  "decision.override", "bid.placed", "sandbox.started", "nudge.sent",
 ];
 
 export default function AdminAudit() {

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useProgramme } from "@/lib/programmeData";
 import { monthLabel } from "@/lib/programme";
-import { groundDropState } from "@/lib/groundDrop";
-import RankingIndex from "@/components/cb/RankingIndex";
+import { monthTitle, shortDate, clockLabel } from "@/lib/pledge";
+import PledgeBoard from "@/components/pledge/PledgeBoard";
 import StatusChip from "@/components/cb/StatusChip";
 import CountUp from "@/components/cb/CountUp";
 import Marquee from "@/components/cb/Marquee";
 import { marqueeItems, publicNudges } from "@/lib/metrics";
 import NudgeList from "@/components/cb/NudgeList";
+import ImpactLine from "@/components/cb/ImpactLine";
 
 const OTHER_OFFICES = [
   { id: "changi", name: "Changi Business Park", floors: 4, eligible: 96, monthG: 1420, allG: 8200, monthP: 21, allP: 34 },
@@ -16,16 +17,23 @@ const OTHER_OFFICES = [
 
 const OTHER_BANK = { name: "Straits Meridian Bank", offices: 2, eligible: 240, monthKg: 3.94, allKg: 21.6, monthP: 12.8, allP: 22.1 };
 
+const PAST_MONTHS = [
+  { key: "2026-10", note: "Pre-auction ranking by g reused per employee. Pledge Auction starts in November." },
+  { key: "2026-09", note: "Pre-auction ranking by g reused per employee. Pledge Auction starts in November." },
+];
+
 export default function Leaderboard() {
-  const { rows, allRows, myRow, me, month, settings, prevRows, challenges } = useProgramme();
+  const { rows, allRows, myRow, me, month, board, config, rowsFor, settings } = useProgramme();
   const [tab, setTab] = useState("floors");
+  const [past, setPast] = useState("");
   const [period, setPeriod] = useState("month");
-  const st = groundDropState(settings);
+
+  const marquee = marqueeItems({ board, config, month });
+
+  const pastMeta = PAST_MONTHS.find((p) => p.key === past);
+  const pastRows = past ? rowsFor(past) : null;
 
   const list = period === "month" ? rows : allRows;
-  const activeChallenge = challenges.find((c) => c.status === "active");
-  const marquee = marqueeItems({ rows, myRow, nextDropLabel: `${st.nextLabel} · ${st.time}`, challenge: activeChallenge });
-
   const marinaReused = list.reduce((s, r) => s + r.reused, 0);
   const marinaParticipants = list.reduce((s, r) => s + r.participants, 0);
 
@@ -55,6 +63,8 @@ export default function Leaderboard() {
     },
   ];
 
+  const leader = board[0];
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -62,20 +72,36 @@ export default function Leaderboard() {
           <p className="text-[11px] uppercase tracking-[0.18em] text-sub">leaderboard · {monthLabel(month)}</p>
           <h1 className="display mt-3 text-[54px] sm:text-[88px]">leaderboard.</h1>
         </div>
-        <div className="flex items-center gap-2">
-          {[["month", "this month"], ["all", "all time"]].map(([k, l]) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setPeriod(k)}
-              className={`rounded-full border px-4 py-2 text-[12px] lowercase transition-colors ${
-                period === k ? "border-ink bg-ink text-white" : "border-rule text-sub hover:border-ink hover:text-ink"
-              }`}
+        {tab === "floors" ? (
+          <label className="flex items-center gap-2 text-[12px] text-sub">
+            <span className="uppercase tracking-[0.12em]">past months</span>
+            <select
+              value={past}
+              onChange={(e) => setPast(e.target.value)}
+              className="h-9 border border-rule bg-white px-2 text-[12px] lowercase"
             >
-              {l}
-            </button>
-          ))}
-        </div>
+              <option value="">this month · pledge auction</option>
+              {PAST_MONTHS.map((p) => (
+                <option key={p.key} value={p.key}>{monthTitle(p.key).toLowerCase()}</option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <div className="flex items-center gap-2">
+            {[["month", "this month"], ["all", "all time"]].map(([k, l]) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setPeriod(k)}
+                className={`rounded-full border px-4 py-2 text-[12px] lowercase transition-colors ${
+                  period === k ? "border-ink bg-ink text-white" : "border-rule text-sub hover:border-ink hover:text-ink"
+                }`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <Marquee items={marquee} className="-mx-5 sm:-mx-8" speed={54} />
@@ -93,54 +119,94 @@ export default function Leaderboard() {
           </button>
         ))}
         <span className="ml-auto pb-3 text-[11px] uppercase tracking-[0.14em] text-sub">
-          {tab === "floors" ? "kg reused per employee" : tab === "offices" ? "kg reused per eligible employee" : "aggregated only"}
+          {tab !== "floors"
+            ? tab === "offices"
+              ? "kg reused per eligible employee"
+              : "aggregated only"
+            : past
+            ? "g reused per employee"
+            : "projected pledge score"}
         </span>
       </div>
 
       {tab === "floors" && (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.6fr_1fr]">
           <div>
-            <RankingIndex rows={list} myFloor={me?.floorCode} />
-            <p className="mt-3 text-[12px] text-sub">
-              Monthly reset. Participation counts colleagues who collected or reported a reuse this period, against{" "}
-              {myRow?.target || 30}% of eligible employees per floor.
-            </p>
+            {past ? (
+              <>
+                <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+                  <h2 className="text-[15px] lowercase">{monthTitle(past)} ranking</h2>
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-sub">closed month</span>
+                </div>
+                <ul className="mt-1">
+                  {(pastRows || []).map((r) => (
+                    <li key={r.code} className="flex items-center gap-4 border-b border-rule py-3">
+                      <span className="w-6 text-[12px] tabular text-sub">{String(r.rank).padStart(2, "0")}</span>
+                      <span className="display text-[19px]">{r.code}</span>
+                      <span className="truncate text-[12px] uppercase tracking-[0.1em] text-sub">{r.name}</span>
+                      <span className="ml-auto tabular text-[15px] text-ink">{Math.round(r.perEmployee)}</span>
+                      <span className="w-[86px] text-right text-[9px] uppercase tracking-[0.12em] text-sub">g / employee</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-[12px] text-sub">{pastMeta?.note}</p>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+                  <h2 className="text-[15px] lowercase">this month&rsquo;s league</h2>
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-sub">pledge auction · projected</span>
+                </div>
+                <div className="mt-3">
+                  <PledgeBoard rows={board} myFloor={me?.floorCode} />
+                </div>
+                <p className="mt-3 text-[12px] leading-relaxed text-sub">
+                  Ranked by projected pledge score: half volume, half uplift against each floor&rsquo;s own bid. A
+                  validation anywhere moves the board immediately.
+                </p>
+              </>
+            )}
           </div>
+
           <div className="space-y-6">
             <div className="bg-paper p-5">
               <p className="text-[11px] uppercase tracking-[0.14em] text-sub">floor of the month</p>
-              <p className="display mt-2 text-[38px]">{list[0]?.code}</p>
-              <p className="text-[13px] text-ink">{list[0]?.name}</p>
+              <p className="display mt-2 text-[38px]">{leader?.code}</p>
+              <p className="text-[13px] text-ink">{leader?.name}</p>
               <p className="mt-2 text-[12px] leading-relaxed text-sub">
-                Announced in the Sustainability team&rsquo;s monthly email. Prize for {monthLabel(month)}: team
-                breakfast funded by Harbourline, or a donation to a charity chosen by the floor. Funded by the bank,
-                never by CoffeeBot.
+                Decided {shortDate(config.monthCloseAt)}, 18:00 · Team breakfast funded by Harbourline. The winner is on{" "}
+                {Math.round(leader?.score || 0)} projected, {leader?.paceMet ? "on track" : "behind"} on its{" "}
+                {leader?.bid}% bid.
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <StatusChip status="pending">provisional</StatusChip>
-                <span className="text-[11px] text-sub">decided on the last working day at 18:00</span>
+                <span className="text-[11px] text-sub">
+                  closes {shortDate(config.monthCloseAt)} {clockLabel(config.monthCloseAt)}
+                </span>
               </div>
             </div>
 
-            <div>
-              <p className="border-b border-rule pb-2 text-[11px] uppercase tracking-[0.14em] text-sub">change vs last month</p>
-              <ul className="mt-2 space-y-1.5">
-                {list.map((r) => {
-                  const prev = prevRows.find((p) => p.code === r.code);
-                  const diff = prev ? prev.rank - r.rank : 0;
-                  return (
-                    <li key={r.code} className="flex items-baseline justify-between text-[12px]">
-                      <span className="text-ink">{r.code}</span>
-                      <span className={`tabular ${diff > 0 ? "text-verdant" : diff < 0 ? "text-[#A44A3F]" : "text-sub"}`}>
-                        {diff > 0 ? `up ${diff}` : diff < 0 ? `down ${Math.abs(diff)}` : "no change"}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            {!past && (
+              <div>
+                <p className="border-b border-rule pb-2 text-[11px] uppercase tracking-[0.14em] text-sub">change vs october</p>
+                <ul className="mt-2 space-y-1.5">
+                  {board.map((r) => {
+                    const prev = rowsFor("2026-10").find((p) => p.code === r.code);
+                    const diff = prev ? prev.rank - r.rank : 0;
+                    return (
+                      <li key={r.code} className="flex items-baseline justify-between text-[12px]">
+                        <span className="text-ink">{r.code}</span>
+                        <span className={`tabular ${diff > 0 ? "text-verdant" : diff < 0 ? "text-[#A44A3F]" : "text-sub"}`}>
+                          {diff > 0 ? `up ${diff}` : diff < 0 ? `down ${Math.abs(diff)}` : "no change"}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
 
-            <NudgeList items={publicNudges({ rows, myRow, monthLabel: monthLabel(month), daysLeft: 22 })} />
+            <NudgeList items={publicNudges({ rows, myRow, monthLabel: monthLabel(month), daysLeft: 21 })} />
           </div>
         </div>
       )}
@@ -158,7 +224,8 @@ export default function Leaderboard() {
                 <CountUp value={o.reusedG / 1000} decimals={2} />
                 <span className="ml-1 text-[14px] lowercase tracking-normal">kg</span>
               </p>
-              <p className="text-[12px] text-sub">
+              <ImpactLine grams={o.reusedG} scope="office" className="mt-1" />
+              <p className="mt-1 text-[12px] text-sub">
                 {Math.round(o.reusedG / o.eligible)} g per eligible employee · {o.participants} of {o.eligible} participating
               </p>
             </div>
@@ -180,7 +247,8 @@ export default function Leaderboard() {
                   <CountUp value={b.reusedKg} decimals={2} />
                   <span className="ml-1 text-[14px] lowercase tracking-normal">kg</span>
                 </p>
-                <p className="text-[12px] text-sub">
+                <ImpactLine grams={b.reusedKg * 1000} scope="office" className="mt-1" />
+                <p className="mt-1 text-[12px] text-sub">
                   {b.eligible} eligible employees · {b.participation}% participating
                 </p>
               </div>

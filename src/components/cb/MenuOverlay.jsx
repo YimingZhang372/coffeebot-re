@@ -9,9 +9,10 @@ const links = [
   { to: "/collect", label: "collect", idx: "02" },
   { to: "/activities", label: "activities", idx: "03" },
   { to: "/community", label: "community", idx: "04" },
-  { to: "/leaderboard", label: "leaderboard", idx: "05" },
-  { to: "/me", label: "me", idx: "06" },
-  { to: "/about", label: "about the programme", idx: "07" },
+  { to: "/pledge", label: "pledge auction", idx: "05" },
+  { to: "/leaderboard", label: "leaderboard", idx: "06" },
+  { to: "/me", label: "me", idx: "07" },
+  { to: "/about", label: "about the programme", idx: "08" },
 ];
 
 export default function MenuOverlay({ open, onClose }) {

@@ -13,11 +13,12 @@ import GroundDropCalendar from "@/components/cb/GroundDropCalendar";
 import NudgeList from "@/components/cb/NudgeList";
 import Pill from "@/components/cb/Pill";
 import StatusChip from "@/components/cb/StatusChip";
+import ImpactLine from "@/components/cb/ImpactLine";
 
 export default function Home() {
   const {
     me, rows, office, prevOffice, myRow, settings, month,
-    myCollections, myReuses, challenges, notifications,
+    myCollections, myReuses, notifications, board, config,
   } = useProgramme();
   const reduce = useReducedMotion();
 
@@ -67,17 +68,13 @@ export default function Home() {
   const list = rows.slice(0, 3);
   if (myRow && !list.find((r) => r.code === myRow.code)) list.push(myRow);
 
-  const activeChallenge = challenges.find((c) => c.status === "active");
   const nudges = publicNudges({ rows, myRow, monthLabel: monthName, daysLeft: 22 });
   const privateNudges = notifications
     .filter((n) => n.type === "nudge" || n.type === "validation")
     .slice(0, 2)
     .map((n) => n.body);
-
-  const marquee = marqueeItems({
-    rows, myRow, nextDropLabel: `${st.nextLabel} · ${st.time}`,
-    challenge: activeChallenge,
-  });
+  const marquee = marqueeItems({ board, config, month });
+  const myPledge = board.find((r) => r.code === me?.floorCode);
 
   return (
     <div className="space-y-10">
@@ -113,6 +110,7 @@ export default function Home() {
             {monthName} to date · {office.participants} of {office.eligible} employees participating ·{" "}
             {office.reuseRate.toFixed(0)}% reuse rate
           </p>
+          <ImpactLine grams={office.reused} scope="office" className="mt-1.5" />
         </div>
         <div className="space-y-4">
           <div>
@@ -181,6 +179,23 @@ export default function Home() {
               <Pill to="/activities" variant="outline" size="sm">activities</Pill>
             </div>
           </div>
+
+          {myPledge && (
+            <Link
+              to="/pledge"
+              className="block bg-ink p-5 text-white transition-colors duration-200 hover:bg-caramel"
+            >
+              <div className="flex items-baseline justify-between">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-white/55">your floor&rsquo;s pledge</p>
+                <span className="text-[12px] lowercase text-white/60">open →</span>
+              </div>
+              <p className="display mt-2 text-[30px] leading-none">+{myPledge.bid}%</p>
+              <p className="mt-2 text-[12.5px] text-white/75">
+                {myPledge.paceMet ? "On track" : "Behind"} · projected {Math.round(myPledge.score)} · rank{" "}
+                {myPledge.rank} of 6
+              </p>
+            </Link>
+          )}
 
           <div className="border-t border-rule pt-5">
             <div className="flex items-baseline justify-between">

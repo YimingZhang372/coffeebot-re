@@ -16,6 +16,7 @@ const LABELS = {
   "/collect": "collect",
   "/activities": "activities",
   "/community": "community",
+  "/pledge": "pledge auction",
   "/leaderboard": "leaderboard",
   "/me": "me",
   "/about": "about the programme",
@@ -71,6 +72,7 @@ export default function AppShell() {
               <Link to="/" className="hover:text-ink">home</Link>
               <Link to="/collect" className="hover:text-ink">collect</Link>
               <Link to="/community" className="hover:text-ink">community</Link>
+              <Link to="/pledge" className="hover:text-ink">pledge</Link>
               <Link to="/leaderboard" className="hover:text-ink">leaderboard</Link>
             </nav>
             <NotificationBell />

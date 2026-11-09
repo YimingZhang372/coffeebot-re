@@ -6,10 +6,41 @@ import { useProgramme } from "@/lib/programmeData";
 import { activityByKey, formatSgt, monthLabel } from "@/lib/programme";
 import AdminKpi from "@/components/admin/AdminKpi";
 import AdminTable from "@/components/admin/AdminTable";
+import { downloadCsv } from "@/lib/csv";
 
 export default function AdminOverview() {
-  const { rows, office, prevOffice, reuses, collections, month, settings, employees } = useProgramme();
+  const { rows, office, prevOffice, reuses, collections, month, settings, employees, config } = useProgramme();
   const target = settings?.participationTarget ?? 30;
+
+  const hoursRows = useMemo(() => {
+    const byEmail = {};
+    reuses
+      .filter((r) => r.status === "validated" && r.occurredAt.slice(0, 7) === month && r.employeeEmail)
+      .forEach((r) => {
+        byEmail[r.employeeEmail] = (byEmail[r.employeeEmail] || 0) + 1;
+      });
+    return Object.entries(byEmail)
+      .map(([email, count]) => {
+        const emp = employees.find((e) => e.email === email);
+        return {
+          floor: emp?.floorCode || "—",
+          employeeRef: emp?.refId || "—",
+          activities: count,
+          hours: Math.min(config.volunteer.monthlyCap, count * config.volunteer.hoursPerActivity),
+          email,
+        };
+      })
+      .sort((a, b) => b.hours - a.hours);
+  }, [reuses, employees, month, config]);
+
+  const exportHours = () =>
+    downloadCsv(`coffeebot-volunteer-hours-${month}.csv`, hoursRows, [
+      { label: "Floor", value: (r) => r.floor },
+      { label: "Employee reference", value: (r) => r.employeeRef },
+      { label: "Validated activities", value: (r) => r.activities },
+      { label: "Volunteer hours", value: (r) => r.hours.toFixed(1) },
+      { label: "Month", value: () => month },
+    ]);
 
   const monthly = useMemo(() => {
     const map = {};
@@ -109,6 +140,38 @@ export default function AdminOverview() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      <div className="border border-rule bg-paper p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-[13px] font-medium">Volunteer hours · {monthLabel(month)}</p>
+            <p className="text-[12px] text-sub">
+              1 validated activity = {config.volunteer.hoursPerActivity} h, capped at {config.volunteer.monthlyCap} h a
+              month. The export feeds the bank&rsquo;s volunteer system.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={exportHours}
+            className="rounded-full border border-rule px-3 py-1 text-[11px] lowercase text-sub transition-colors hover:border-ink hover:text-ink"
+          >
+            export monthly csv
+          </button>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-px bg-rule sm:grid-cols-4">
+          {[
+            ["colleagues with hours", hoursRows.length],
+            ["hours this month", hoursRows.reduce((s, r) => s + r.hours, 0).toFixed(1)],
+            ["activities validated", hoursRows.reduce((s, r) => s + r.activities, 0)],
+            ["at half a day leave", `${config.volunteer.leaveAt} h`],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-canvas px-3 py-3">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-sub">{label}</p>
+              <p className="mt-1 text-[18px] tabular text-ink">{value}</p>
+            </div>
+          ))}
         </div>
       </div>
 

@@ -12,7 +12,7 @@ const OFFICES = [
 const isRecommended = (day) => [1, 2, 3].includes(day);
 
 export default function AdminSettings() {
-  const { settings, saveSettings, eligibleByFloor } = useProgramme();
+  const { settings, saveSettings, eligibleByFloor, config } = useProgramme();
   const [target, setTarget] = useState(settings?.participationTarget ?? 30);
   const [monthlyTarget, setMonthlyTarget] = useState(settings?.monthlyTargetKg ?? 6);
   const [prize, setPrize] = useState(settings?.prizeName || "");
@@ -30,6 +30,22 @@ export default function AdminSettings() {
     );
   });
   const [notice, setNotice] = useState("");
+  const dt = (iso) => String(iso || "").slice(0, 16);
+  const iso = (v) => (String(v || "").length === 16 ? `${v}:00+08:00` : v);
+  const [pledgeForm, setPledgeForm] = useState(() => ({
+    pledgeNightAt: dt(config.pledgeNightAt),
+    finalBidOpenAt: dt(config.finalBidOpenAt),
+    finalBidCloseAt: dt(config.finalBidCloseAt),
+    monthCloseAt: dt(config.monthCloseAt),
+    nextPledgeNightAt: dt(config.nextPledgeNightAt),
+    met: config.multipliers.met,
+    missed: config.multipliers.missed,
+    finalMet: config.multipliers.finalMet,
+    finalMissed: config.multipliers.finalMissed,
+    capVolume: config.caps.volume,
+    capUplift: config.caps.uplift,
+  }));
+  const setPledgeField = (key, value) => setPledgeForm((p) => ({ ...p, [key]: value }));
 
   const save = async () => {
     const marina = schedules["marina-bay"];
@@ -49,8 +65,22 @@ export default function AdminSettings() {
           time: schedules[o.id].time,
           serviceDays: o.serviceDays,
         })),
+        pledge: {
+          pledgeNightAt: iso(pledgeForm.pledgeNightAt),
+          finalBidOpenAt: iso(pledgeForm.finalBidOpenAt),
+          finalBidCloseAt: iso(pledgeForm.finalBidCloseAt),
+          monthCloseAt: iso(pledgeForm.monthCloseAt),
+          nextPledgeNightAt: iso(pledgeForm.nextPledgeNightAt),
+          multipliers: {
+            met: Number(pledgeForm.met),
+            missed: Number(pledgeForm.missed),
+            finalMet: Number(pledgeForm.finalMet),
+            finalMissed: Number(pledgeForm.finalMissed),
+          },
+          caps: { volume: Number(pledgeForm.capVolume), uplift: Number(pledgeForm.capUplift) },
+        },
       },
-      `Programme settings saved: target ${target}%, Marina Bay Ground Drop ${DOW_NAMES[Number(marina.day)]} ${marina.time}, clear-out ${DOW_NAMES[(Number(marina.day) + 2) % 7]}.`
+      `Programme settings saved: target ${target}%, Marina Bay Ground Drop ${DOW_NAMES[Number(marina.day)]} ${marina.time}, final bid ${iso(pledgeForm.finalBidOpenAt)}, multipliers ${pledgeForm.met}/${pledgeForm.missed}/${pledgeForm.finalMet}/${pledgeForm.finalMissed}, caps ${pledgeForm.capVolume}/${pledgeForm.capUplift}.`
     );
     setNotice(`Saved. The Ground Drop day is now ${DOW_NAMES[Number(marina.day)]} for Marina Bay and the clear-out day is ${DOW_NAMES[(Number(marina.day) + 2) % 7]}.`);
   };
@@ -200,6 +230,58 @@ export default function AdminSettings() {
         </div>
         <p className="mt-3 text-[11px] text-sub">
           Monday to Wednesday are recommended: wet grounds keep 2-3 days before the clear-out.
+        </p>
+      </div>
+
+      <div className="border border-rule bg-paper p-4">
+        <p className="text-[13px] font-medium">Pledge Auction</p>
+        <p className="mt-1 text-[12px] text-sub">
+          Pledge Night, the final bid window, the month close, the multipliers and the point caps. Every change is
+          written to the audit log.
+        </p>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {[
+            ["pledgeNightAt", "Pledge Night"],
+            ["finalBidOpenAt", "Final bid opens"],
+            ["finalBidCloseAt", "Final bid closes"],
+            ["monthCloseAt", "Month closes"],
+            ["nextPledgeNightAt", "Next Pledge Night"],
+          ].map(([key, label]) => (
+            <label key={key} className="block">
+              <span className="text-[10px] uppercase tracking-[0.12em] text-sub">{label}</span>
+              <input
+                type="datetime-local"
+                value={pledgeForm[key]}
+                onChange={(e) => setPledgeField(key, e.target.value)}
+                className="mt-1 h-9 w-full border border-rule bg-white px-2 text-[12px] tabular"
+              />
+            </label>
+          ))}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {[
+            ["met", "× if bid met"],
+            ["missed", "× if bid missed"],
+            ["finalMet", "× final bid met"],
+            ["finalMissed", "× final bid missed"],
+            ["capVolume", "volume cap"],
+            ["capUplift", "uplift cap"],
+          ].map(([key, label]) => (
+            <label key={key} className="block">
+              <span className="text-[10px] uppercase tracking-[0.12em] text-sub">{label}</span>
+              <input
+                type="number"
+                step="0.05"
+                value={pledgeForm[key]}
+                onChange={(e) => setPledgeField(key, e.target.value)}
+                className="mt-1 h-9 w-full border border-rule bg-white px-2 text-[12px] tabular"
+              />
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-sub">
+          Volunteer leave: {config.volunteer.leaveAt} h = half a day, capped at {config.volunteer.monthlyCap} h a month
+          and {config.volunteer.annualCap} h a year. Monthly hours export from the overview.
         </p>
       </div>
 

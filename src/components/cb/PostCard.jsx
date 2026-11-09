@@ -2,6 +2,7 @@ import { useState } from "react";
 import { activityByKey, timeAgo } from "@/lib/programme";
 import { useProgramme } from "@/lib/programmeData";
 import { cropFor } from "@/lib/photoCrop";
+import { authorLabel, avatarInitials } from "@/lib/people";
 import StatusChip from "./StatusChip";
 import CountUp from "./CountUp";
 import MentionText from "./MentionText";
@@ -11,8 +12,6 @@ const KIND_LABEL = {
   question: "question to the other floors",
   progress: "progress · day 1 to day 10",
 };
-
-const authorLabel = (reuse) => (reuse.showName ? reuse.employeeName : `${reuse.floorCode} colleague`);
 
 export default function PostCard({ reuse, onOpen }) {
   const { comments, me, toggleReaction, reviewReuse } = useProgramme();
@@ -30,7 +29,7 @@ export default function PostCard({ reuse, onOpen }) {
     <article className="bg-paper transition-transform duration-200 hover:-translate-y-[2px]">
       <button type="button" onClick={() => onOpen(reuse)} className="block w-full text-left">
         {reuse.photoUrl ? (
-          <div className="relative aspect-[4/5] overflow-hidden bg-[#D6D2CD]">
+          <div className="group relative aspect-[4/5] overflow-hidden bg-[#D6D2CD]">
             <img
               src={reuse.photoUrl}
               alt={`${activity.name} reuse on ${reuse.floorCode}`}
@@ -42,8 +41,10 @@ export default function PostCard({ reuse, onOpen }) {
                 {reuse.status === "pending" ? "pending validation" : reuse.status}
               </StatusChip>
             </div>
-            <div className="absolute bottom-3 left-3 text-[11px] uppercase tracking-[0.14em] text-white">
-              <span className="bg-ink/70 px-2 py-1">{reuse.floorCode} · {activity.name}</span>
+            <div className="pointer-events-none absolute bottom-3 left-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className="bg-ink/80 px-2 py-1 text-[10.5px] uppercase tracking-[0.14em] text-white">
+                {reuse.floorCode} · {activity.name}
+              </span>
             </div>
           </div>
         ) : (
@@ -59,7 +60,7 @@ export default function PostCard({ reuse, onOpen }) {
           <div className="flex items-center gap-2">
             {reuse.showName && (
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DFDBD6] text-[10px] uppercase tracking-[0.06em] text-ink">
-                {authorLabel(reuse).split(" ").slice(0, 2).map((p) => p[0]).join("")}
+                {avatarInitials(reuse.employeeName)}
               </span>
             )}
             <div>

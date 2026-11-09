@@ -9,15 +9,11 @@ import LoginGrid from "@/components/cb/LoginGrid";
 import { useSession } from "@/lib/session";
 import { useProgramme } from "@/lib/programmeData";
 import { formatSgt } from "@/lib/programme";
+import { marqueeItems } from "@/lib/metrics";
 
 const PHOTO_KEYS = ["plant", "mushrooms", "compost", "scrub", "deodoriser", "grounds", "plant", "compost"];
 
-const MARQUEE = [
-  "L11 leads L10 by 5 g reused per employee",
-  "4 more colleagues for L10 to reach 30%",
-  "next ground drop tue 10 nov · 10:00",
-  "L10 vs L11 challenge live, 2 to 15 nov",
-];
+
 
 function Preloader({ onDone }) {
   const [pct, setPct] = useState(0);
@@ -68,9 +64,10 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const { signIn } = useSession();
-  const { reuses } = useProgramme();
+  const { reuses, board, config, month } = useProgramme();
   const reduce = useReducedMotion();
   const validatedCount = reuses.filter((r) => r.status === "validated").length;
+  const marquee = marqueeItems({ board, config, month });
 
   const enter = (workEmail, role) => {
     signIn({ email: workEmail, role });
@@ -129,26 +126,26 @@ export default function Login() {
             <div className="text-[11px] uppercase tracking-[0.22em] text-sub">
               harbourline bank · sustainability programme
             </div>
-            <h1 className="display mt-5 text-[54px] sm:text-[88px] xl:text-[104px]">
+            <h1 className="display mt-3 text-[40px] sm:text-[54px] xl:text-[62px]">
               grounds
               <br />
               into
               <br />
               evidence.
             </h1>
-            <p className="mt-6 max-w-[46ch] text-[15px] leading-relaxed text-sub">
+            <p className="mt-4 max-w-[46ch] text-[14px] leading-relaxed text-sub">
               CoffeeBot Re collects the spent grounds from the tabletop machines on each
               Harbourline floor, weighs them at the collection table, and turns the reuse your
               colleagues report into a validated, report-ready ESG figure.
             </p>
 
-            <div className="mt-9 max-w-[520px]">
+            <div className="mt-6 max-w-[520px]">
               <motion.div
                 initial={reduce ? false : { opacity: 0, y: 18, rotate: 0 }}
                 animate={loading ? {} : { opacity: 1, y: 0, rotate: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
               >
-                <Ticket id="CB-ACC-2026-MB" rotate={-2.4}>
+                <Ticket id="CB-ACC-2026-MB" rotate={0}>
                   <h2 className="text-[17px] font-medium">Sign in to the programme</h2>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-sub">
                     Marina Bay · 6 floors · 150 employees
@@ -207,7 +204,7 @@ export default function Login() {
           </div>
         </div>
 
-        <Marquee items={MARQUEE} />
+        <Marquee items={marquee} />
 
         <section className="px-5 py-14 sm:px-10">
           <div className="flex flex-wrap items-end justify-between gap-3">

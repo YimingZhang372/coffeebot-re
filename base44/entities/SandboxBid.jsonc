@@ -1,0 +1,45 @@
+{
+  "name": "SandboxBid",
+  "type": "object",
+  "properties": {
+    "roundKey": {
+      "type": "string"
+    },
+    "floor": {
+      "type": "string",
+      "description": "Demo floor A, B, C or D"
+    },
+    "bid": {
+      "type": "number"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "opening",
+        "final"
+      ],
+      "enumColors": [
+        "gray",
+        "blue"
+      ]
+    },
+    "bidder": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "roundKey",
+    "floor",
+    "bid"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

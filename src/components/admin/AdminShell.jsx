@@ -9,10 +9,12 @@ const NAV = [
   { to: "/admin", label: "Overview", end: true },
   { to: "/admin/activity", label: "Activity" },
   { to: "/admin/floors", label: "Floors" },
+  { to: "/admin/pledges", label: "Pledges" },
   { to: "/admin/tables", label: "Collection tables" },
   { to: "/admin/certificates", label: "ESG Certificates" },
   { to: "/admin/email", label: "Monthly email" },
   { to: "/admin/carbon", label: "Carbon module" },
+  { to: "/admin/calculations", label: "How we calculate" },
   { to: "/admin/settings", label: "Programme settings" },
   { to: "/admin/audit", label: "Audit log" },
 ];

@@ -1,0 +1,43 @@
+{
+  "name": "SandboxRound",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Fixed round key, demo for the public pledge room"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "bidding",
+        "final",
+        "revealed"
+      ],
+      "enumColors": [
+        "blue",
+        "yellow",
+        "green"
+      ]
+    },
+    "winner": {
+      "type": "string"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revealedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "key"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {},
+    "delete": {}
+  }
+}

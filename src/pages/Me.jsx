@@ -8,21 +8,24 @@ import StatusChip from "@/components/cb/StatusChip";
 import Pill from "@/components/cb/Pill";
 import CountUp from "@/components/cb/CountUp";
 import EmptyState from "@/components/cb/EmptyState";
+import ImpactLine from "@/components/cb/ImpactLine";
+import { leaveProgress, volunteerHours } from "@/lib/benefits";
 
 const QUARTER = "2026-Q4";
 
 export default function Me() {
-  const { me, myCollections, myReuses, certificates, month } = useProgramme();
+  const { me, myCollections, myReuses, certificates, month, config } = useProgramme();
   const [filter, setFilter] = useState("all");
 
   const collected = myCollections.reduce((s, c) => s + c.grams, 0);
   const validated = myReuses.filter((r) => r.status === "validated");
   const reused = validated.reduce((s, r) => s + r.grams, 0);
-  const hours = validated.length * 0.5;
+  const hours = volunteerHours(myReuses, config);
 
   const quarterReuses = myReuses.filter((r) => r.occurredAt >= "2026-10-01" && r.occurredAt <= "2026-12-31");
   const quarterValidated = quarterReuses.filter((r) => r.status === "validated");
   const quarterCollected = myCollections.filter((c) => c.occurredAt >= "2026-10-01");
+  const quarterHours = volunteerHours(quarterReuses, config);
 
   const employeeCert = {
     certId: `CB-EMP-${QUARTER}-${(me?.refId || "EMP").slice(-3)}`,
@@ -35,7 +38,7 @@ export default function Me() {
     kgReused: Number((quarterValidated.reduce((s, r) => s + r.grams, 0) / 1000).toFixed(2)),
     reuseRate: 0,
     activitiesDone: quarterValidated.length,
-    volunteeringHours: quarterValidated.length * 0.5,
+    volunteeringHours: quarterHours.total,
     nextTarget: "1 reuse record per month",
     issuedAt: new Date().toISOString(),
   };
@@ -79,10 +82,15 @@ export default function Me() {
 
       <div className="grid grid-cols-2 gap-px bg-rule border-y border-rule lg:grid-cols-4">
         {[
-          { label: "kg collected", value: collected / 1000, unit: "weighed" },
-          { label: "kg reused", value: reused / 1000, unit: "validated" },
+          { label: "kg collected", value: collected / 1000, unit: "weighed", grams: collected },
+          { label: "kg reused", value: reused / 1000, unit: "validated", grams: reused },
           { label: "activities done", value: validated.length, unit: "all time", decimals: 0 },
-          { label: "volunteering hours", value: hours, unit: "1 activity = 0.5 h", decimals: 1 },
+          {
+            label: "volunteering hours",
+            value: hours.total,
+            unit: `max ${config.volunteer.monthlyCap} h a month`,
+            decimals: 1,
+          },
         ].map((k) => (
           <div key={k.label} className="bg-canvas px-4 py-6">
             <p className="text-[11px] uppercase tracking-[0.14em] text-sub">{k.label}</p>
@@ -90,6 +98,7 @@ export default function Me() {
               <CountUp value={k.value} decimals={k.decimals ?? 2} />
             </p>
             <p className="text-[11px] uppercase tracking-[0.12em] text-sub">{k.unit}</p>
+            {k.grams ? <ImpactLine grams={k.grams} scope="personal" className="mt-1" /> : null}
           </div>
         ))}
       </div>
@@ -171,6 +180,30 @@ export default function Me() {
             </Pill>
             <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-sub">
               {employeeCert.certId} · no CO2e on employee certificates
+            </p>
+          </div>
+
+          <div className="bg-paper p-5">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-sub">volunteer leave</p>
+            <p className="display mt-2 flex items-baseline gap-2 text-[34px]">
+              {hours.total.toFixed(1)}
+              <span className="text-[13px] lowercase tracking-normal text-sub">/ {config.volunteer.leaveAt} h</span>
+            </p>
+            <div className="mt-2 h-[3px] w-full bg-rule">
+              <span
+                className="block h-[3px] bg-verdant"
+                style={{ width: `${leaveProgress(hours.total, config.volunteer.leaveAt)}%` }}
+              />
+            </div>
+            <p className="mt-2 text-[12px] leading-relaxed text-sub">
+              Every {config.volunteer.leaveAt} h = half a day of volunteer leave. 1 validated activity ={" "}
+              {config.volunteer.hoursPerActivity} h, capped at {config.volunteer.monthlyCap} h a month and{" "}
+              {config.volunteer.annualCap} h a year. Hours export monthly to the bank&rsquo;s volunteer system.
+            </p>
+            <p className="mt-2 text-[11px] text-sub">
+              {hours.total < config.volunteer.leaveAt
+                ? `${(config.volunteer.leaveAt - hours.total).toFixed(1)} h to the next half day`
+                : "half a day of volunteer leave earned"}
             </p>
           </div>
 

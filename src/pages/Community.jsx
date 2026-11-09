@@ -6,9 +6,8 @@ import { publicNudges } from "@/lib/metrics";
 import { monthLabel, formatSgt } from "@/lib/programme";
 import Composer from "@/components/cb/Composer";
 import PostCard from "@/components/cb/PostCard";
-import PostTicket from "@/components/cb/PostTicket";
+import PostModal from "@/components/cb/PostModal";
 import FloorStories from "@/components/cb/FloorStories";
-import ChallengePanel from "@/components/cb/ChallengePanel";
 import EmptyState from "@/components/cb/EmptyState";
 import NudgeList from "@/components/cb/NudgeList";
 import Pill from "@/components/cb/Pill";
@@ -17,10 +16,10 @@ import WelcomeCard from "@/components/cb/WelcomeCard";
 import ChampionCard from "@/components/cb/ChampionCard";
 import { marqueeItems } from "@/lib/metrics";
 
-const TABS = ["Feed", "Gallery", "Challenges"];
+const TABS = ["Feed", "Gallery"];
 
 export default function Community() {
-  const { me, reuses, rows, myRow, month, challenges, nudgeFloor } = useProgramme();
+  const { me, reuses, rows, myRow, month, nudgeFloor, board, config } = useProgramme();
   const [nudge, setNudge] = useState("");
   const nudgeBlocked =
     me?.lastNudgeAt && Date.now() - new Date(me.lastNudgeAt).getTime() < 7 * 86400000;
@@ -95,8 +94,7 @@ export default function Community() {
     .filter((r) => r.floorCode === me?.floorCode && r.status === "validated")
     .sort((a, b) => (a.occurredAt < b.occurredAt ? 1 : -1))[0];
 
-  const activeChallenge = challenges.find((c) => c.status === "active");
-  const marquee = marqueeItems({ rows, myRow, nextDropLabel: "tue 10 nov · 10:00", challenge: activeChallenge });
+  const marquee = marqueeItems({ board, config, month });
 
   return (
     <div className="space-y-8">
@@ -394,9 +392,7 @@ export default function Community() {
         </div>
       )}
 
-      {tab === "Challenges" && <ChallengePanel />}
-
-      {openPost && <PostTicket reuse={openPost} onClose={() => setOpenPost(null)} />}
+      {openPost && <PostModal reuse={openPost} onClose={() => setOpenPost(null)} />}
     </div>
   );
 }

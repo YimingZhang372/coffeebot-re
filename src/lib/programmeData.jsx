@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useSession } from "@/lib/session";
-import { FLOORS } from "@/lib/programme";
+import { FLOORS, formatSgt } from "@/lib/programme";
 import { currentMonth, floorRows, officeTotals } from "@/lib/metrics";
+import { auctionBoard, bidFor, clockLabel, dropsDoneIn, pledgeConfig } from "@/lib/pledge";
 
 const Ctx = createContext(null);
 
@@ -26,7 +27,7 @@ export function ProgrammeProvider({ children }) {
   const [collections, setCollections] = useState([]);
   const [reuses, setReuses] = useState([]);
   const [comments, setComments] = useState([]);
-  const [challenges, setChallenges] = useState([]);
+  const [pledges, setPledges] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [saves, setSaves] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -34,12 +35,12 @@ export function ProgrammeProvider({ children }) {
   const [me, setMe] = useState(null);
 
   const load = useCallback(async () => {
-    const [emp, col, reu, com, cha, cer, sav, set] = await Promise.all([
+    const [emp, col, reu, com, ple, cer, sav, set] = await Promise.all([
       all(base44.entities.Employee),
       all(base44.entities.Collection),
       all(base44.entities.Reuse),
       all(base44.entities.Comment),
-      all(base44.entities.Challenge),
+      all(base44.entities.Pledge),
       all(base44.entities.Certificate),
       all(base44.entities.ActivitySave),
       all(base44.entities.ProgrammeSetting),
@@ -48,7 +49,7 @@ export function ProgrammeProvider({ children }) {
     setCollections(col);
     setReuses(reu);
     setComments(com);
-    setChallenges(cha);
+    setPledges(ple);
     setCertificates(cer);
     setSaves(sav);
     setSettings(set[0] || null);
@@ -546,44 +547,67 @@ export function ProgrammeProvider({ children }) {
     [me, logEvent, refresh]
   );
 
-  const createChallenge = useCallback(
-    async ({ toFloor, startDate, endDate }) => {
-      const refId = `CH-2026-${String(1000 + challenges.length).slice(-4)}`;
-      await base44.entities.Challenge.create({
-        refId,
-        fromFloor: me.floorCode,
-        toFloor,
-        metric: "kg reused per employee",
-        startDate,
-        endDate,
-        status: "pending",
-        createdBy: me.name,
-        office: "Marina Bay",
-      });
+  const placeBid = useCallback(
+    async (pct, kind = "opening") => {
+      if (!me?.floorCode) throw new Error("Your account has no floor assigned.");
+      const value = Math.round(Number(pct));
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        throw new Error("Enter a whole percentage between 0 and 100.");
+      }
+      const existing = bidFor(pledges, month, me.floorCode);
+      const current = existing ? (existing.finalBid ?? existing.openingBid) : null;
+      if (kind === "final" && !existing) throw new Error("Place your opening bid first.");
+      if (kind === "final" && value <= current) throw new Error("Bids can only be raised");
+      if (kind === "opening" && existing && value === existing.openingBid) {
+        throw new Error("That is already your opening bid.");
+      }
+      if (kind === "final") {
+        const open = new Date(config.finalBidOpenAt).getTime();
+        const close = new Date(config.finalBidCloseAt).getTime();
+        const now = Date.now();
+        if (now < open) {
+          throw new Error(
+            `Final bids open ${formatSgt(config.finalBidOpenAt, false)} at ${clockLabel(config.finalBidOpenAt)}.`
+          );
+        }
+        if (now > close) throw new Error("The final bid window has closed.");
+        if (existing.finalBid != null) throw new Error("Your floor has already used its one raise.");
+      }
+
+      const entry = { at: new Date().toISOString(), by: `${me.name} · ${me.floorCode} Champion`, pct: value, kind };
+      if (!existing) {
+        await base44.entities.Pledge.create({
+          month,
+          floorCode: me.floorCode,
+          openingBid: value,
+          bids: [entry],
+          createdBy: me.name,
+        });
+      } else {
+        await base44.entities.Pledge.update(existing.id, {
+          openingBid: kind === "opening" ? value : existing.openingBid,
+          finalBid: kind === "final" ? value : existing.finalBid ?? null,
+          bids: [...(existing.bids || []), entry],
+        });
+      }
+
       await logEvent({
-        eventType: "challenge.created",
-        employeeLabel: me.name,
+        eventType: "bid.placed",
+        employeeLabel: `${me.floorCode} Champion`,
         employeeEmail: me.email,
         floorCode: me.floorCode,
-        quantity: 0,
-        status: "Pending acceptance",
+        quantity: value,
+        quantityUnit: "% uplift bid",
+        status: kind === "final" ? "Final bid" : "Opening bid",
         actor: me.name,
-        entityRef: refId,
-        detail: `${me.floorCode} challenged ${toFloor} on kg reused per employee.`,
+        entityRef: `PLEDGE-${month}-${me.floorCode}`,
+        detail: `${kind === "final" ? "Final bid raised" : "Opening bid placed"} at +${value}% uplift for ${month}.`,
+        auditable: true,
       });
       await refresh();
+      return value;
     },
-    [me, challenges, logEvent, refresh]
-  );
-
-  const respondChallenge = useCallback(
-    async (challenge, accept) => {
-      await base44.entities.Challenge.update(challenge.id, {
-        status: accept ? "active" : "declined",
-      });
-      await refresh();
-    },
-    [refresh]
+    [me, pledges, month, config, logEvent, refresh]
   );
 
   const nudgeFloor = useCallback(async () => {
@@ -622,6 +646,17 @@ export function ProgrammeProvider({ children }) {
     return { sent: recipients.length };
   }, [employees, me, myRow, logEvent, refresh]);
 
+  const totalEligible = useMemo(
+    () => Object.values(eligibleByFloor).reduce((s, n) => s + Number(n || 0), 0),
+    [eligibleByFloor]
+  );
+  const config = useMemo(() => pledgeConfig(settings, totalEligible), [settings, totalEligible]);
+  const dropsDone = useMemo(() => dropsDoneIn(month, settings), [month, settings]);
+  const board = useMemo(
+    () => auctionBoard({ month, rows, rowsFor, pledges, config, dropsDone, reuses, settings }),
+    [month, rows, rowsFor, pledges, config, dropsDone, reuses, settings]
+  );
+
   const value = {
     loading,
     me,
@@ -629,7 +664,10 @@ export function ProgrammeProvider({ children }) {
     collections,
     reuses,
     comments,
-    challenges,
+    pledges,
+    board,
+    config,
+    dropsDone,
     certificates,
     saves,
     notifications: myNotifications,
@@ -660,8 +698,7 @@ export function ProgrammeProvider({ children }) {
     saveSettings,
     setCertificateStatus,
     createCertificate,
-    createChallenge,
-    respondChallenge,
+    placeBid,
     nudgeFloor,
     logEvent,
     maskLabel,

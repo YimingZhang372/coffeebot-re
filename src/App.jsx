@@ -15,6 +15,8 @@ import Collect from '@/pages/Collect';
 import Activities from '@/pages/Activities';
 import Community from '@/pages/Community';
 import Leaderboard from '@/pages/Leaderboard';
+import Pledge from '@/pages/Pledge';
+import PledgeRoom from '@/pages/PledgeRoom';
 import Me from '@/pages/Me';
 import About from '@/pages/About';
 import Demo from '@/pages/Demo';
@@ -25,6 +27,8 @@ import AdminShell from '@/components/admin/AdminShell';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import AdminActivity from '@/pages/admin/AdminActivity';
 import AdminFloors from '@/pages/admin/AdminFloors';
+import AdminPledges from '@/pages/admin/AdminPledges';
+import AdminCalculations from '@/pages/admin/AdminCalculations';
 import AdminTables from '@/pages/admin/AdminTables';
 import AdminCertificates from '@/pages/admin/AdminCertificates';
 import AdminEmail from '@/pages/admin/AdminEmail';
@@ -37,6 +41,7 @@ const AppRoutes = () => (
     <Route path="/login" element={<Login />} />
     <Route path="/admin/login" element={<AdminLogin />} />
     <Route path="/demo" element={<Demo />} />
+    <Route path="/pledge-room/demo" element={<PledgeRoom />} />
     <Route path="/verify/:certificateId" element={<Verify />} />
 
     <Route element={<AppShell />}>
@@ -45,6 +50,7 @@ const AppRoutes = () => (
       <Route path="/activities" element={<Activities />} />
       <Route path="/community" element={<Community />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/pledge" element={<Pledge />} />
       <Route path="/me" element={<Me />} />
       <Route path="/about" element={<About />} />
       <Route path="/welcome" element={<Welcome />} />
@@ -54,6 +60,8 @@ const AppRoutes = () => (
       <Route index element={<AdminOverview />} />
       <Route path="activity" element={<AdminActivity />} />
       <Route path="floors" element={<AdminFloors />} />
+      <Route path="pledges" element={<AdminPledges />} />
+      <Route path="calculations" element={<AdminCalculations />} />
       <Route path="tables" element={<AdminTables />} />
       <Route path="certificates" element={<AdminCertificates />} />
       <Route path="email" element={<AdminEmail />} />

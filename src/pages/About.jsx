@@ -45,9 +45,12 @@ export default function About() {
                 ["Launched by", "Chief Sustainability Officer, internal email to all staff"],
                 ["Participation target", "30% of eligible employees per floor, per month"],
                 ["Floor Champions", "One named champion per floor validates reuse records"],
+                ["Pledge Auction", "Monthly: each floor bids the uplift it will reach. Half volume, half uplift."],
+                ["Volunteer time", "1 validated activity = 0.5 h, max 1 h a month · every 10 h = half a day of volunteer leave"],
                 ["Leadership review", "Monthly, with the results table exported for the ESG report"],
                 ["Evidence standard", "Weighed at collection · Reported at reuse · Validated by the Champion"],
                 ["Reporting line", "GRI 306-4 Waste diverted from disposal — preparation for reuse"],
+                ["For the bank", "weighed kg reported under GRI 306-4, participation by floor, no extra CoffeeBot trips."],
               ].map(([k, v]) => (
                 <div key={k} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-[200px_1fr] sm:gap-4">
                   <dt className="text-[12px] uppercase tracking-[0.12em] text-sub">{k}</dt>
@@ -62,8 +65,8 @@ export default function About() {
           <figure>
             <img src={IMG.machine} alt="A tabletop coffee machine in a corporate pantry" className="h-[260px] w-full rounded-[2px] object-cover" />
             <figcaption className="mt-2 text-[12px] text-sub">
-              Every coffee leaves about 15 g of wet spent grounds. About 1,000 cups a month at Marina Bay, 60%
-              coffee-based.
+              Every coffee leaves about 15 g of wet spent grounds. About 3,000 coffee-based drinks a month at Marina
+              Bay, 45 kg of grounds, 300 g per employee.
             </figcaption>
           </figure>
           <figure>

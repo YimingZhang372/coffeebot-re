@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ACTIVITIES } from "@/lib/programme";
 import { useProgramme } from "@/lib/programmeData";
+import { useToast } from "@/components/ui/use-toast";
 import PhotoUpload from "./PhotoUpload";
 import Pill from "./Pill";
 
 export default function Composer({ onDone, prefill = "", autoOpen = false }) {
-  const { me, submitReuse } = useProgramme();
+  const { me, submitReuse, myCollections, myReuses } = useProgramme();
+  const { toast } = useToast();
   const [open, setOpen] = useState(autoOpen || !!prefill);
   const [photo, setPhoto] = useState("");
   const [activityKey, setActivityKey] = useState("plant");
@@ -16,21 +19,38 @@ export default function Composer({ onDone, prefill = "", autoOpen = false }) {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
 
+  const collected = myCollections.reduce((s, c) => s + (c.grams || 0), 0);
+  const alreadyReused = myReuses.filter((r) => r.status !== "rejected").reduce((s, r) => s + (r.grams || 0), 0);
+  const remaining = Math.max(0, collected - alreadyReused);
+
   const submit = async (e) => {
     e.preventDefault();
     const g = Number(grams);
     if (!photo) return setError("Attach a photo of the reused grounds.");
-    if (!Number.isFinite(g) || g < 10 || g > 2000) return setError("Enter grams reused between 10 and 2000.");
+    if (!grams || !Number.isFinite(g) || g <= 0) return setError("Enter the grams reused. It must be more than 0.");
+    if (g > remaining) {
+      return setError(
+        remaining
+          ? `That is more than your weighed grounds not yet reused (${remaining} g left).`
+          : "You have no weighed grounds waiting to be reused. Log a collection first."
+      );
+    }
     if (note.trim().length < 5) return setError("Add a short note (at least 5 characters).");
     setError("");
     setBusy(true);
-    const created = await submitReuse({ activityKey, grams: g, note: note.trim(), photoUrl: photo, showName });
-    setBusy(false);
-    setDone(created);
-    setPhoto("");
-    setGrams("");
-    setNote("");
-    onDone?.();
+    try {
+      const created = await submitReuse({ activityKey, grams: g, note: note.trim(), photoUrl: photo, showName });
+      setDone(created);
+      setPhoto("");
+      setGrams("");
+      setNote("");
+      toast({ title: `Submitted · ${created.refId}`, description: "Pending validation by your Floor Champion." });
+      onDone?.();
+    } catch (err) {
+      setError(err?.message || "The record could not be submitted. Try again.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   if (done) {
@@ -39,7 +59,8 @@ export default function Composer({ onDone, prefill = "", autoOpen = false }) {
         <p className="text-[11px] uppercase tracking-[0.14em] text-sub">submitted · pending validation</p>
         <p className="mt-2 text-[17px] text-ink">{done.refId} is with the {me?.floorCode} Floor Champion.</p>
         <p className="mt-1 text-[13px] leading-relaxed text-sub">
-          Points are added to your floor the moment it is validated, and the leaderboard updates immediately.
+          Your post is at the top of the feed now. Points are added to your floor the moment it is validated, and the
+          pledge board updates with it.
         </p>
         <div className="mt-3 flex gap-2">
           <Pill size="sm" onClick={() => setDone(null)}>share another</Pill>
@@ -60,7 +81,9 @@ export default function Composer({ onDone, prefill = "", autoOpen = false }) {
         </span>
         <span>
           <span className="block text-[14px] text-ink">share a reuse</span>
-          <span className="block text-[12px] text-sub">photo, grams reused and a short note · within 14 days of collecting</span>
+          <span className="block text-[12px] text-sub">
+            photo, grams reused and a short note · {remaining} g of your weighed grounds left to reuse
+          </span>
         </span>
         <span className="ml-auto text-[12px] text-sub">open</span>
       </button>
@@ -96,10 +119,13 @@ export default function Composer({ onDone, prefill = "", autoOpen = false }) {
           <input
             inputMode="numeric"
             value={grams}
-            onChange={(e) => setGrams(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            onChange={(e) => { setGrams(e.target.value.replace(/\D/g, "").slice(0, 4)); setError(""); }}
             placeholder="150"
             className="mt-1 h-11 w-full border border-rule bg-white px-3 text-[13px] tabular outline-none focus:border-ink"
           />
+          <span className="mt-1 block text-[10.5px] text-sub">
+            {remaining > 0 ? `${remaining} g weighed and not yet reused` : "no weighed grounds left to reuse"}
+          </span>
         </label>
       </div>
 
@@ -121,10 +147,19 @@ export default function Composer({ onDone, prefill = "", autoOpen = false }) {
           onChange={(e) => setShowName(e.target.checked)}
           className="h-4 w-4 accent-[hsl(var(--cb-caramel))]"
         />
-        show my name (off by default — posts appear as {me?.floorCode} colleague)
+        show my first name (off by default — posts appear as {me?.floorCode} colleague)
       </label>
 
-      {error && <p className="text-[12px] text-[#A44A3F]">{error}</p>}
+      {error && (
+        <p className="text-[12px] text-[#A44A3F]">
+          {error}{" "}
+          {remaining <= 0 && (
+            <Link to="/collect" className="underline decoration-rule underline-offset-4 hover:text-ink">
+              log a collection
+            </Link>
+          )}
+        </p>
+      )}
       <Pill type="submit" disabled={busy}>{busy ? "submitting…" : "submit reuse record"}</Pill>
     </form>
   );

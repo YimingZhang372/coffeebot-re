@@ -69,6 +69,88 @@
         }
       }
     },
+    "impacts": {
+      "type": "object",
+      "description": "Inputs behind every figure and the impact translator",
+      "properties": {
+        "gramsPerCoffee": {
+          "type": "number"
+        },
+        "drinksPerMonth": {
+          "type": "number"
+        },
+        "workingDays": {
+          "type": "number"
+        }
+      }
+    },
+    "volunteer": {
+      "type": "object",
+      "properties": {
+        "hoursPerActivity": {
+          "type": "number"
+        },
+        "monthlyCap": {
+          "type": "number"
+        },
+        "annualCap": {
+          "type": "number"
+        },
+        "leaveAt": {
+          "type": "number",
+          "description": "Hours that earn half a day of volunteer leave"
+        }
+      }
+    },
+    "pledge": {
+      "type": "object",
+      "description": "Pledge Auction dates, multipliers and point caps",
+      "properties": {
+        "pledgeNightAt": {
+          "type": "string"
+        },
+        "finalBidOpenAt": {
+          "type": "string"
+        },
+        "finalBidCloseAt": {
+          "type": "string"
+        },
+        "monthCloseAt": {
+          "type": "string"
+        },
+        "nextPledgeNightAt": {
+          "type": "string"
+        },
+        "multipliers": {
+          "type": "object",
+          "properties": {
+            "met": {
+              "type": "number"
+            },
+            "missed": {
+              "type": "number"
+            },
+            "finalMet": {
+              "type": "number"
+            },
+            "finalMissed": {
+              "type": "number"
+            }
+          }
+        },
+        "caps": {
+          "type": "object",
+          "properties": {
+            "volume": {
+              "type": "number"
+            },
+            "uplift": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
     "carbon": {
       "type": "object",
       "properties": {
