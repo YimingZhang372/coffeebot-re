@@ -547,6 +547,12 @@ export function ProgrammeProvider({ children }) {
     [me, logEvent, refresh]
   );
 
+  const totalEligible = useMemo(
+    () => Object.values(eligibleByFloor).reduce((s, n) => s + Number(n || 0), 0),
+    [eligibleByFloor]
+  );
+  const config = useMemo(() => pledgeConfig(settings, totalEligible), [settings, totalEligible]);
+
   const placeBid = useCallback(
     async (pct, kind = "opening") => {
       if (!me?.floorCode) throw new Error("Your account has no floor assigned.");
@@ -646,11 +652,6 @@ export function ProgrammeProvider({ children }) {
     return { sent: recipients.length };
   }, [employees, me, myRow, logEvent, refresh]);
 
-  const totalEligible = useMemo(
-    () => Object.values(eligibleByFloor).reduce((s, n) => s + Number(n || 0), 0),
-    [eligibleByFloor]
-  );
-  const config = useMemo(() => pledgeConfig(settings, totalEligible), [settings, totalEligible]);
   const dropsDone = useMemo(() => dropsDoneIn(month, settings), [month, settings]);
   const board = useMemo(
     () => auctionBoard({ month, rows, rowsFor, pledges, config, dropsDone, reuses, settings }),
