@@ -9,6 +9,8 @@ export const IMG = {
   scrub: "https://media.base44.com/images/public/6af009251fa749a8e1bae5e5/9287c7748_generated_image.png",
   deodoriser: "https://media.base44.com/images/public/6af009251fa749a8e1bae5e5/ef00cb4cd_generated_image.png",
   banner: "https://media.base44.com/images/public/6af009251fa749a8e1bae5e5/cc043221f_generated_image.png",
+  // Pledge page header. Replace with the pledge-night photo URL once uploaded.
+  pledgeNight: "https://media.base44.com/images/public/6af009251fa749a8e1bae5e5/cc043221f_generated_image.png",
 };
 
 export const HARBOURLINE_MARK = "HARBOURLINE BANK";
