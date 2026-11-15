@@ -1,5 +1,10 @@
 # Base44 Project
 
+To view demo accounts,
+visit https://coffeebot-re.base44.app/login
+click "sign in with harbourline sso"
+
+To clone this app, there are 2 ways:
 Method 1:
 visit https://coffeebot-re.base44.app/login
 click :"edit with Base44" at bottom right
