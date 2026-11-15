@@ -1,5 +1,13 @@
 # Base44 Project
 
+Method 1:
+visit https://coffeebot-re.base44.app/login
+click :"edit with Base44" at bottom right
+click "Clone this app"
+this creates an app with no pre-loaded images or mock employee data
+
+
+Method 2:
 Use this repository to run and edit the app locally, then publish changes back through Base44.
 
 Any change pushed to the repo will also be reflected in the Base44 Builder.
